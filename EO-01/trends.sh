@@ -22,6 +22,7 @@ cd $INP
 
 
 # define relative I/O directories
+# these need to match the "data repository" and the parameterfiles
 #----------------------------------------------------------------------------------
 
 # satellite data
