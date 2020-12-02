@@ -61,6 +61,14 @@ HIGHER_PARS="$HIGHER_MAIN"/"parameters"
 TILE_ALLOW="$HIGHER_MAIN"/"tiles.txt"
 
 
+# basic input tests, do you need these, or is this somehow handled by the workflow language?
+# just an example here
+#----------------------------------------------------------------------------------
+if [ ! -r "$PAR_LEVEL2" ]; then
+  echo "$PAR_LEVEL2 is not readable"; exit
+fi
+
+
 # Next lines are for downloading the satellite data, we assume this is already done
 # Uncomment this if necessary, do not do this multiple times
 #----------------------------------------------------------------------------------
