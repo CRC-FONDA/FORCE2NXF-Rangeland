@@ -86,6 +86,8 @@ mkdir -p "$LEVEL2_ARD"
 
 # this here can be parallelized per image, todo: expose the loop
 # todo with feedback from Fabian, how to handle the parameterfile? Especially directories
+# how do we make the input data available to the groups?
+# should the parameterfiles be in this repository, or rather in the "data repository"?
 # cp and sed?
 force-level2 "$PAR_LEVEL2"
 
@@ -95,6 +97,7 @@ force-level2 "$PAR_LEVEL2"
 
 cp "$GRID_DEF" -t "$LEVEL2_ARD"
 
+# collect the processed files
 find "$LEVEL2_WRS" -name '*BOA.tif' > "$LEVEL2_WRS"/"boa.txt"
 find "$LEVEL2_WRS" -name '*QAI.tif' > "$LEVEL2_WRS"/"qai.txt"
 
