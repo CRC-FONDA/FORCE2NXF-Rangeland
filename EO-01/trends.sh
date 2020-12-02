@@ -29,6 +29,7 @@ cd $INP
 LANDSAT_MAIN="input/landsat"
 LANDSAT_META="$LANDSAT_MAIN"/"metadata"
 LANDSAT_DATA="$LANDSAT_MAIN"/"data"
+LANDSAT_QUEUE="$LANDSAT_MAIN"/"queue.txt"
 
 # vector data and area-of-interest (AOI)
 VECTOR_MAIN="input/vector"
@@ -81,7 +82,7 @@ fi
 #force-level1-csd -u -s LT04,LT05,LE07 "$LANDSAT_META"
 
 # download data
-#force-level1-csd -s LT04,LT05,LE07 -d 19840101,20061231 -c 0,70 "$LANDSAT_META" "$LANDSAT_DATA" "$LANDSAT_MAIN"/"queue.txt" "$AOI"
+#force-level1-csd -s LT04,LT05,LE07 -d 19840101,20061231 -c 0,70 "$LANDSAT_META" "$LANDSAT_DATA" "$LANDSAT_QUEUE" "$AOI"
 
 
 # Step 1: preprocessing
@@ -93,12 +94,20 @@ mkdir -p "$LEVEL2_LOG"
 mkdir -p "$LEVEL2_TMP"
 mkdir -p "$LEVEL2_ARD"
 
-# this here can be parallelized per image, todo: expose the loop
-# todo with feedback from Fabian, how to handle the parameterfile? Especially directories
+# extract 1st column of queue 
+# 2nd column is a tag "QUEUED/DONE", which controls whether an image is processed or not
+# not sure if we need this, processing all in queue for now
+cat "$LANDSAT_QUEUE" | cut -f 1 > "$LEVEL2_TMP"/"queue.txt"
+
+# this here can be parallelized per image
+# todo with feedback from Fabian: I would normally use multiple processes per node, and use additional multithreading when RAM is an issue
+# todo with feedback from Fabian, how to handle the parameterfile? Especially directories, also multithreading
 # how do we make the input data available to the groups?
 # should the parameterfiles be in this repository, or rather in the "data repository"?
 # cp and sed?
-force-level2 "$PAR_LEVEL2"
+while IFS="" read -r f; do
+  force-level2 $f "$PAR_LEVEL2"
+done < "$LEVEL2_TMP"/"queue.txt"
 
 
 # Step 1.5: data cubing
