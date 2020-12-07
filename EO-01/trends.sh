@@ -106,7 +106,8 @@ cat "$LANDSAT_QUEUE" | cut -f 1 > "$LEVEL2_TMP"/"queue.txt"
 # should the parameterfiles be in this repository, or rather in the "data repository"?
 # cp and sed?
 while IFS="" read -r f; do
-  force-level2 $f "$PAR_LEVEL2"
+  LOG=${f##*/}
+  force-l2ps $f "$PAR_LEVEL2" > "$LEVEL2_LOG"/"$LOG".log
 done < "$LEVEL2_TMP"/"queue.txt"
 
 
