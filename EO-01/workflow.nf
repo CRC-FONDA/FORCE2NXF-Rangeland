@@ -28,7 +28,9 @@ process downloadData{
     file parameters from parameterFiles
 
     output:
+    //Folders with data of one single image
     file 'data/*/*' into data
+    //Pathes to all these folders
     file 'queue.txt' into queue
 
     """
@@ -49,10 +51,13 @@ process preprocess{
 
     input:
     file parameters from parameterFiles
+    //only process one directory at once
     file data from data.flatten()
 
     output:
+    //One BOA image
     file '**BOA.tif' into boaFiles
+    //One QAI image
     file '**QAI.tif' into qaiFiles
 
     """
@@ -79,6 +84,7 @@ process processBOA{
     container 'fegyi001/force'
 
     input:
+    //Run this methode for all boa images seperately
     file boa from boaFiles.flatten()
     file 'ard/datacube-definition.prj' from projectionFile
 
@@ -94,10 +100,12 @@ process processQAI{
     container 'fegyi001/force'
 
     input:
+    //Run this methode for all qai images seperately
     file qai from qaiFiles.flatten()
     file 'ard/datacube-definition.prj' from projectionFile
 
     output:
+    //Two outputs, to use it twice
     tuple val(qai.baseName), file('ard/') into ardFiles1
     tuple val(qai.baseName), file('ard/') into ardFiles2
 
@@ -117,6 +125,7 @@ process generateAnalysisMask{
     file parameters from parameterFiles
 
     output:
+    //Mask for whole region
     file 'mask/' into masks
 
     """
@@ -134,7 +143,9 @@ process generateTileAllowList{
     file parameters from parameterFiles
 
     output:
+    //Combination of filename, ARD images of this file and higher pars
     tuple val(filename), file(ard), file('higherPars/*.prm') into higherPars
+    //Tile allow for this image
     file 'tileAllow.txt' into tileAllow
 
     """
@@ -181,6 +192,7 @@ process processHigherLevel{
     container 'fegyi001/force'
 
     input:
+    //Process higher level for each filename seperately
     tuple val(filename), file(ard), file(higherPar) from higherParsFlat
     file mask from masks
     file parameters from parameterFiles
@@ -201,7 +213,9 @@ process processMosaic{
     container 'fegyi001/force'
 
     input:
+    //Use higherpar files of all images
     file 'higher/parameters/*' from higherPar2.flatten().unique{ x -> x.baseName }.buffer( size: Integer.MAX_VALUE, remainder: true ).unique()
+    //Use only one tile allow, should be joined instead.
     file 'higher/tile.txt' from tileAllow.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
 
     output:
