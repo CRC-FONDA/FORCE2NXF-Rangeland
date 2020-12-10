@@ -1,6 +1,7 @@
 
 sensors = "LT04,LT05,LE07"
 timeRange = "20061201,20061231"
+shapeFile = "crete.shp"
 //TODO export input/vector/**, determine name automatically
 
 process downloadParams{
@@ -40,7 +41,7 @@ process downloadData{
     mkdir data
     touch queue.txt
 
-    force-level1-csd -s $sensors -d $timeRange -c 0,70 meta/ data/ queue.txt input/vector/crete.shp
+    force-level1-csd -s $sensors -d $timeRange -c 0,70 meta/ data/ queue.txt input/vector/$shapeFile
     """
 
 }
@@ -62,7 +63,6 @@ process preprocess{
 
     """
     FILEPATH=$data
-    echo '\$FILEPATH' > queue.txt
     PARAM=$parameters/parameters/level2.prm
     mkdir level2_wrs
     mkdir level2_log
@@ -79,7 +79,7 @@ process preprocess{
 
 }
 
-process processBOA{
+process processCubeBOA{
 
     container 'fegyi001/force'
 
@@ -95,7 +95,7 @@ process processBOA{
 
 }
 
-process processQAI{
+process processCubeQAI{
 
     container 'fegyi001/force'
 
@@ -129,7 +129,7 @@ process generateAnalysisMask{
     file 'mask/' into masks
 
     """
-    force-cube $parameters/vector/crete.shp mask/ rasterize 30
+    force-cube $parameters/vector/$shapeFile mask/ rasterize 30
     """
 
 }
@@ -150,7 +150,7 @@ process generateTileAllowList{
 
     """
     echo $filename
-    force-tile-extent $parameters/vector/crete.shp ard/ tileAllow.txt
+    force-tile-extent $parameters/vector/$shapeFile ard/ tileAllow.txt
     sed -i '1d' tileAllow.txt
 
     mkdir higherPars
