@@ -1,7 +1,7 @@
 
 sensors = "LT04,LT05,LE07"
 timeRange = "20061201,20061231"
-shapeFile = "crete.shp"
+shapeFile = "crete.shp" //later aoi.shp
 //TODO export input/vector/**, determine name automatically
 
 process downloadParams{
@@ -10,7 +10,7 @@ process downloadParams{
     container 'fegyi001/force'
 
     output:
-    file 'input/' into parameterFiles
+    file 'input/' into auxiliaryFiles
     file 'input/grid/datacube-definition.prj' into projectionFile
 
     """
@@ -26,7 +26,7 @@ process downloadData{
     container 'fegyi001/force'
 
     input:
-    file parameters from parameterFiles
+    file parameters from auxiliaryFiles
 
     output:
     //Folders with data of one single image
@@ -51,7 +51,7 @@ process preprocess{
     container 'fegyi001/force'
 
     input:
-    file parameters from parameterFiles
+    file parameters from auxiliaryFiles
     //only process one directory at once
     file data from data.flatten()
 
@@ -122,7 +122,7 @@ process generateAnalysisMask{
 
     input:
     file 'mask/datacube-definition.prj' from projectionFile
-    file parameters from parameterFiles
+    file parameters from auxiliaryFiles
 
     output:
     //Mask for whole region
@@ -140,7 +140,7 @@ process generateTileAllowList{
 
     input:
     tuple val(filename), file(ard) from ardFiles1
-    file parameters from parameterFiles
+    file parameters from auxiliaryFiles
 
     output:
     //Combination of filename, ARD images of this file and higher pars
@@ -195,7 +195,7 @@ process processHigherLevel{
     //Process higher level for each filename seperately
     tuple val(filename), file(ard), file(higherPar) from higherParsFlat
     file mask from masks
-    file parameters from parameterFiles
+    file parameters from auxiliaryFiles
 
     output:
     file higherPar into higherPar2
