@@ -60,24 +60,6 @@ process generateTileAllowList{
 
     """
     force-tile-extent $parameters/vector/$shapeFile ard/ tileAllow.txt
-    #sed -i '1d' tileAllow.txt
-
-    mkdir higherPars
-
-    cp input/parameters/higher-level_trends.prm higher-level_trends.prm
-    sed -i "/DIR_LOWER =/c\\DIR_LOWER = ard/" higher-level_trends.prm
-    sed -i "/DIR_HIGHER =/c\\DIR_HIGHER = trend/" higher-level_trends.prm
-    sed -i "/DIR_MASK =/c\\DIR_MASK = mask/" higher-level_trends.prm
-    sed -i "/FILE_ENDMEM  =/c\\FILE_ENDMEM = $parameters/endmember/hostert-2003.txt" higher-level_trends.prm
-    sed -i "/FILE_ENDMEM =/c\\FILE_ENDMEM = $parameters/endmember/hostert-2003.txt" higher-level_trends.prm
-
-    while IFS="" read -r t; do
-        X=\${t:1:4}
-        Y=\${t:7:11}
-        cp higher-level_trends.prm higherPars/"\$t.prm"
-        sed -i "s/REPX/\$X/g" higherPars/"\$t.prm"
-        sed -i "s/REPY/\$Y/g" higherPars/"\$t.prm"
-    done < tileAllow.txt
     """
 
 }
@@ -217,46 +199,50 @@ process mergeQAI{
 
 }
 
-boaTilesDone = boaTilesDone.concat(boaTilesMerged)
-qaiTilesDone = qaiTilesDone.concat(qaiTilesMerged)
+//Concat merged list with single images, group by tile over time
+boaTilesDone = boaTilesDone.concat(boaTilesMerged).map{ x -> [x[0].substring(0,11), x[1]]}.groupTuple()
+qaiTilesDone = qaiTilesDone.concat(qaiTilesMerged).map{ x -> [x[0].substring(0,11), x[1]]}.groupTuple()
 
-boaTilesDone.view()
+process processHigherLevel{
 
-class Pair {
-    Object a
-    Object b
-    Object c
+    container 'fegyi001/force'
 
-    Pair(a, b, c) {          
-        this.a = a
-        this.b = b
-        this.c = c
-    }
+    input:
+    tuple val(tile), file("ard/*") from boaTilesDone
+    file 'ard/datacube-definition.prj' from projectionFile
+    file mask from masks
+    file parameters from auxiliaryFiles
+
+    //output:
+    //file higherPar into higherPar2
+
+    """
+
+    PARAM=$parameters/parameters/higher-level_trends.prm
+    
+    #Replace pathes
+    sed -i "/DIR_LOWER =/c\\DIR_LOWER = ard/" \$PARAM
+    sed -i "/DIR_HIGHER =/c\\DIR_HIGHER = trend/" \$PARAM
+    sed -i "/DIR_MASK =/c\\DIR_MASK = mask/" \$PARAM
+    sed -i "/FILE_ENDMEM  =/c\\FILE_ENDMEM = $parameters/endmember/hostert-2003.txt" \$PARAM
+    sed -i "/FILE_ENDMEM =/c\\FILE_ENDMEM = $parameters/endmember/hostert-2003.txt" \$PARAM
+
+    #Replace Tile to process
+    TILE="$tile"
+    X=\${TILE:1:4}
+    Y=\${TILE:7:11}
+    sed -i "s/REPX/\$X/g" \$PARAM
+    sed -i "s/REPY/\$Y/g" \$PARAM
+
+    echo \$X
+    echo \$Y
+    ls ard/
+    mkdir trend
+    
+    force-higher-level \$PARAM
+    """
+
 }
-
-//own Pair, otherwise flat would unzip tuples
-// higherParsFlat = higherPars.map{x-> x[2].collect{ y -> new Pair(x[0], x[1], y)}}.flatten().map{x -> [x.a, x.b, x.c]}
-
-// process processHigherLevel{
-
-//     container 'fegyi001/force'
-
-//     input:
-//     //Process higher level for each filename seperately
-//     tuple val(filename), file(ard), file(higherPar) from higherParsFlat
-//     file mask from masks
-//     file parameters from auxiliaryFiles
-
-//     output:
-//     file higherPar into higherPar2
-
-//     """
-//     echo $filename
-//     mkdir trend
-//     force-higher-level $higherPar
-//     """
-
-// }
 
 // process processMosaic{
 
