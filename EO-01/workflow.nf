@@ -1,7 +1,8 @@
 
 sensors = "LT04,LT05,LE07"
-timeRange = "20061201,20061231"
-//TODO export input/vector/**, determine name automatically
+timeRange = "20060420,20060420"
+shapeFile = "crete.shp" //later aoi.shp
+useCPU = 4
 
 process downloadParams{
 
@@ -9,7 +10,7 @@ process downloadParams{
     container 'fegyi001/force'
 
     output:
-    file 'input/' into parameterFiles
+    file 'input/' into auxiliaryFiles
     file 'input/grid/datacube-definition.prj' into projectionFile
 
     """
@@ -25,7 +26,7 @@ process downloadData{
     container 'fegyi001/force'
 
     input:
-    file parameters from parameterFiles
+    file parameters from auxiliaryFiles
 
     output:
     //Folders with data of one single image
@@ -40,121 +41,7 @@ process downloadData{
     mkdir data
     touch queue.txt
 
-    force-level1-csd -s $sensors -d $timeRange -c 0,70 meta/ data/ queue.txt input/vector/crete.shp
-    """
-
-}
-
-process preprocess{
-    
-    container 'fegyi001/force'
-
-    input:
-    //file parameters from parameterFiles
-    //only process one directory at once
-    file data from data.flatten()
-    file cube from projectionFile        // is this the correct syntax to input a file?
-    file tile from tileAllow
-
-    output:
-    //One BOA image       // how does nextflow know, in which directory to look for the output images?
-    file '**BOA.tif' into boaFiles
-    //One QAI image
-    file '**QAI.tif' into qaiFiles
-
-    """
-    FILEPATH=$data
-    BASE=$(basename $data)
-
-    # make directories     ### comments allowed in here?
-    mkdir level2_ard       ### is there a reason against working with variables? (like I did with $PARAM below)
-    mkdir level2_log
-    mkdir level2_tmp
-
-    # generate parameterfile from scratch
-    force-parameter . LEVEL2 0
-    PARAM=$BASE.prm
-    mv *.prm $PARAM
-
-    # read grid definition
-    CRS=$(sed '1q;d' $cube)
-    ORIGINX=$(sed '2q;d' $cube)
-    ORIGINY=$(sed '3q;d' $cube)
-    TILESIZE=$(sed '6q;d' $cube)
-    BLOCKSIZE=$(sed '7q;d' $cube)
-
-    # set parameters
-    sed -i "/DIR_LEVEL2 =/c\\DIR_LEVEL2 = level2_ard/" \$PARAM      ### why do you escape the $-sign? Not done with FILEPATH
-    sed -i "/DIR_LOG =/c\\DIR_LOG = level2_log/" \$PARAM
-    sed -i "/DIR_TEMP =/c\\DIR_TEMP = level2_tmp/" \$PARAM
-    sed -i "/FILE_DEM =/c\\FILE_DEM = input/dem/dem.vrt" \$PARAM    ### not sure I understand this here. Is "input" known?
-    sed -i "/DIR_WVPLUT =/c\\DIR_WVPLUT = input/wvdb/" \$PARAM      ### just a note on sed for readability: you can set the pattern delimiter to any other sign to avoid confusion with the "/" of filepaths, e.g. sed '+pattern+c\replacement+'
-    sed -i "/FILE_TILE =/c\\FILE_TILE = $tile" \$PARAM
-    sed -i "/TILE_SIZE =/c\\TILE_SIZE = $TILESIZE" \$PARAM
-    sed -i "/BLOCK_SIZE =/c\\BLOCK_SIZE = $BLOCKSIZE" \$PARAM
-    sed -i "/ORIGIN_LON =/c\\ORIGIN_LON = $ORIGINX" \$PARAM
-    sed -i "/ORIGIN_LAT =/c\\ORIGIN_LAT = $ORIGINY" \$PARAM
-    sed -i "/PROJECTION =/c\\PROJECTION = $CRS" \$PARAM
-    sed -i "/NTHREAD =/c\\NTHREAD = 1/" \$PARAM                     ### probably replaced by a variable
-
-    # preprocess
-    force-l2ps \$FILEPATH \$PARAM > level2_log\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
-    """
-
-
-}
-
-process processBOA{
-
-    container 'fegyi001/force'
-
-    input:
-    //Run this methode for all boa images seperately
-    file boa from boaFiles.flatten()
-    file 'ard/datacube-definition.prj' from projectionFile
-
-    """
-    printf '%s\\n' "$boa"
-    force-cube "$boa" ard/ cubic 30
-    """
-
-}
-
-process processQAI{
-
-    container 'fegyi001/force'
-
-    input:
-    //Run this methode for all qai images seperately
-    file qai from qaiFiles.flatten()
-    file 'ard/datacube-definition.prj' from projectionFile
-
-    output:
-    //Two outputs, to use it twice
-    tuple val(qai.baseName), file('ard/') into ardFiles1
-    tuple val(qai.baseName), file('ard/') into ardFiles2
-
-    """
-    printf '%s\\n' "$qai"
-    force-cube "$qai" ard/ near 30
-    """
-
-}
-
-process generateAnalysisMask{
-
-    container 'fegyi001/force'
-
-    input:
-    file 'mask/datacube-definition.prj' from projectionFile
-    file parameters from parameterFiles
-
-    output:
-    //Mask for whole region
-    file 'mask/' into masks
-
-    """
-    force-cube $parameters/vector/crete.shp mask/ rasterize 30
+    force-level1-csd -s $sensors -d $timeRange -c 0,70 meta/ data/ queue.txt input/vector/$shapeFile
     """
 
 }
@@ -164,19 +51,16 @@ process generateTileAllowList{
     container 'fegyi001/force'
 
     input:
-    tuple val(filename), file(ard) from ardFiles1
-    file parameters from parameterFiles
+    file 'ard/datacube-definition.prj' from projectionFile
+    file parameters from auxiliaryFiles
 
     output:
-    //Combination of filename, ARD images of this file and higher pars
-    tuple val(filename), file(ard), file('higherPars/*.prm') into higherPars
     //Tile allow for this image
     file 'tileAllow.txt' into tileAllow
 
     """
-    echo $filename
-    force-tile-extent $parameters/vector/crete.shp ard/ tileAllow.txt
-    sed -i '1d' tileAllow.txt
+    force-tile-extent $parameters/vector/$shapeFile ard/ tileAllow.txt
+    #sed -i '1d' tileAllow.txt
 
     mkdir higherPars
 
@@ -198,6 +82,165 @@ process generateTileAllowList{
 
 }
 
+process generateAnalysisMask{
+
+    container 'fegyi001/force'
+
+    input:
+    file 'mask/datacube-definition.prj' from projectionFile
+    file parameters from auxiliaryFiles
+
+    output:
+    //Mask for whole region
+    file 'mask/' into masks
+
+    """
+    force-cube $parameters/vector/$shapeFile mask/ rasterize 30
+    """
+
+}
+
+process preprocess{
+    
+    container 'fegyi001/force'
+
+    input:
+
+    //only process one directory at once
+    file data from data.flatten()
+    file cube from projectionFile
+    file tile from tileAllow
+
+    output:
+    //One BOA image
+    file '**BOA.tif' into boaFiles
+    //One QAI image
+    file '**QAI.tif' into qaiTiles
+    stdout preprocessLog
+
+    """
+    BASE=\$(basename $data)
+
+    # make directories
+    mkdir level2_ard
+    mkdir level2_log
+    mkdir level2_tmp
+
+    # generate parameterfile from scratch
+    force-parameter . LEVEL2 0
+    PARAM=\$BASE.prm
+    mv *.prm \$PARAM
+
+    # read grid definition
+    CRS=\$(sed '1q;d' $cube)
+    ORIGINX=\$(sed '2q;d' $cube)
+    ORIGINY=\$(sed '3q;d' $cube)
+    TILESIZE=\$(sed '6q;d' $cube)
+    BLOCKSIZE=\$(sed '7q;d' $cube)
+
+    # set parameters
+    sed -i "/DIR_LEVEL2 =/c\\DIR_LEVEL2 = level2_ard/" \$PARAM
+    sed -i "/DIR_LOG =/c\\DIR_LOG = level2_log/" \$PARAM
+    sed -i "/DIR_TEMP =/c\\DIR_TEMP = level2_tmp/" \$PARAM
+    sed -i "/FILE_DEM =/c\\FILE_DEM = input/dem/dem.vrt" \$PARAM
+    sed -i "/DIR_WVPLUT =/c\\DIR_WVPLUT = input/wvdb/" \$PARAM
+    sed -i "/FILE_TILE =/c\\FILE_TILE = $tile" \$PARAM
+    sed -i "/TILE_SIZE =/c\\TILE_SIZE = \$TILESIZE" \$PARAM
+    sed -i "/BLOCK_SIZE =/c\\BLOCK_SIZE = \$BLOCKSIZE" \$PARAM
+    sed -i "/ORIGIN_LON =/c\\ORIGIN_LON = \$ORIGINX" \$PARAM
+    sed -i "/ORIGIN_LAT =/c\\ORIGIN_LAT = \$ORIGINY" \$PARAM
+    sed -i "/PROJECTION =/c\\PROJECTION = \$CRS" \$PARAM
+    sed -i "/NTHREAD =/c\\NTHREAD = $useCPU/" \$PARAM
+
+    # preprocess
+    force-l2ps \$FILEPATH \$PARAM > level2_log\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
+
+    results=`find level2_wrs/*/*.tif`
+    #join tile and filename
+    for path in \$results; do
+       mv \$path \${path%/*}_\${path##*/}
+    done;
+
+    """
+
+}
+
+boaTiles = boaTiles.flatten().map{ x -> [x.simpleName, x]}.groupTuple()
+
+boaTiles.into{boaTilesToMerge ; boaTilesDone}
+boaTilesToMerge = boaTilesToMerge.filter{ x -> x[1].size() > 1 }
+boaTilesDone = boaTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
+
+process mergeBOA{
+
+    input:
+    tuple val(id), file('tile/tile?.tif') from boaTilesToMerge
+
+    output:
+    tuple val(id), file('merged.tif') into boaTilesMerged
+
+    """
+    mv tile/tile1.tif "$id".tif
+    gdal_merge.py -q -o $id".tif" -n $NODATA -a_nodata $NODATA \
+    -init $NODATA -of GTiff -co 'INTERLEAVE=BAND' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' \
+    -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" \
+    -co "BLOCKYSIZE=$YBLOCK" $OUT/$TILE/$BASE"_TEMP1.tif" $OUT/$TILE/$BASE"_TEMP2.tif"
+    """
+
+}
+
+boaTilesDone = boaTilesDone.concat(boaTilesMerged)
+
+boaTilesDone.view()
+
+// process processCubeQAI{
+
+//     container 'fegyi001/force'
+
+//     input:
+//     //Run this methode for all qai images seperately
+//     file qai from qaiFiles.flatten()
+//     file 'ard/datacube-definition.prj' from projectionFile
+//     file tileAllow from tileAllow
+
+//     output:
+//     file '**QAI.tif' into qaiTiles
+
+//     """
+//     printf '%s\\n' "$qai"
+//     force-cube "$qai" ard/ near 30
+
+//     results=`find ard/*/*QAI.tif`
+
+//     for path in \$results; do
+//         mv \$path \${path%/*}_\${path##*/}
+//     done;
+//     """
+
+// }
+
+qaiTiles = qaiTiles.flatten().map{ x -> [x.baseName.substring(0,20), x]}.groupTuple()
+qaiTiles.into{qaiTilesToMerge ; qaiTilesDone}
+qaiTilesToMerge = qaiTilesToMerge.filter{ x -> x[1].size() > 1 }
+qaiTilesDone = qaiTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
+
+process mergeQAI{
+
+    input:
+    tuple val(id), file('tile/tile?.tif') from qaiTilesToMerge
+
+    output:
+    tuple val(id), file('merged.tif') into qaiTilesMerged
+
+    """
+    mv tile/tile1.tif merged.tif
+    """
+
+}
+
+qaiTilesDone = qaiTilesDone.concat(qaiTilesMerged)
+
+
 class Pair {
     Object a
     Object b
@@ -209,64 +252,65 @@ class Pair {
         this.c = c
     }
 }
+
 //own Pair, otherwise flat would unzip tuples
-higherParsFlat = higherPars.map{x-> x[2].collect{ y -> new Pair(x[0], x[1], y)}}.flatten().map{x -> [x.a, x.b, x.c]}
+// higherParsFlat = higherPars.map{x-> x[2].collect{ y -> new Pair(x[0], x[1], y)}}.flatten().map{x -> [x.a, x.b, x.c]}
 
-process processHigherLevel{
+// process processHigherLevel{
 
-    container 'fegyi001/force'
+//     container 'fegyi001/force'
 
-    input:
-    //Process higher level for each filename seperately
-    tuple val(filename), file(ard), file(higherPar) from higherParsFlat
-    file mask from masks
-    file parameters from parameterFiles
+//     input:
+//     //Process higher level for each filename seperately
+//     tuple val(filename), file(ard), file(higherPar) from higherParsFlat
+//     file mask from masks
+//     file parameters from auxiliaryFiles
 
-    output:
-    file higherPar into higherPar2
+//     output:
+//     file higherPar into higherPar2
 
-    """
-    echo $filename
-    mkdir trend
-    force-higher-level $higherPar
-    """
+//     """
+//     echo $filename
+//     mkdir trend
+//     force-higher-level $higherPar
+//     """
 
-}
+// }
 
-process processMosaic{
+// process processMosaic{
 
-    container 'fegyi001/force'
+//     container 'fegyi001/force'
 
-    input:
-    //Use higherpar files of all images
-    file 'higher/parameters/*' from higherPar2.flatten().unique{ x -> x.baseName }.buffer( size: Integer.MAX_VALUE, remainder: true ).unique()
-    //Use only one tile allow, should be joined instead.
-    file 'higher/tile.txt' from tileAllow.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
+//     input:
+//     //Use higherpar files of all images
+//     file 'higher/parameters/*' from higherPar2.flatten().unique{ x -> x.baseName }.buffer( size: Integer.MAX_VALUE, remainder: true ).unique()
+//     //Use only one tile allow, should be joined instead.
+//     file 'higher/tile.txt' from tileAllow.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
 
-    output:
-    file 'higher/mosaic/*.vrt' into masaics
+//     output:
+//     file 'higher/mosaic/*.vrt' into masaics
 
-    """
-    mv higher/tile.txt1 higher/tiles.txt
-    force-mosaic higher
-    """
+//     """
+//     mv higher/tile.txt1 higher/tiles.txt
+//     force-mosaic higher
+//     """
 
-}
+// }
 
-process processPyramid{
+// process processPyramid{
 
-    container 'fegyi001/force'
+//     container 'fegyi001/force'
 
-    input:
-    file mosaic from masaics.flatten()
+//     input:
+//     file mosaic from masaics.flatten()
 
-    output:
-    stdout result
+//     output:
+//     stdout result
 
-    """
-    force-pyramid $mosaic
-    """
+//     """
+//     force-pyramid $mosaic
+//     """
 
-}
+// }
 
-result.view()
+// result.view()
