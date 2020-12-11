@@ -50,30 +50,55 @@ process preprocess{
     container 'fegyi001/force'
 
     input:
-    file parameters from parameterFiles
+    //file parameters from parameterFiles
     //only process one directory at once
     file data from data.flatten()
+    file cube from projectionFile        // is this the correct syntax to input a file?
+    file tile from tileAllow
 
     output:
-    //One BOA image
+    //One BOA image       // how does nextflow know, in which directory to look for the output images?
     file '**BOA.tif' into boaFiles
     //One QAI image
     file '**QAI.tif' into qaiFiles
 
     """
     FILEPATH=$data
-    echo '\$FILEPATH' > queue.txt
-    PARAM=$parameters/parameters/level2.prm
-    mkdir level2_wrs
+    BASE=$(basename $data)
+
+    # make directories     ### comments allowed in here?
+    mkdir level2_ard       ### is there a reason against working with variables? (like I did with $PARAM below)
     mkdir level2_log
     mkdir level2_tmp
-    sed -i "/DIR_LEVEL2 =/c\\DIR_LEVEL2 = level2_wrs/" \$PARAM
-    sed -i "/FILE_QUEUE =/c\\FILE_QUEUE = queue.txt" \$PARAM
+
+    # generate parameterfile from scratch
+    force-parameter . LEVEL2 0
+    PARAM=$BASE.prm
+    mv *.prm $PARAM
+
+    # read grid definition
+    CRS=$(sed '1q;d' $cube)
+    ORIGINX=$(sed '2q;d' $cube)
+    ORIGINY=$(sed '3q;d' $cube)
+    TILESIZE=$(sed '6q;d' $cube)
+    BLOCKSIZE=$(sed '7q;d' $cube)
+
+    # set parameters
+    sed -i "/DIR_LEVEL2 =/c\\DIR_LEVEL2 = level2_ard/" \$PARAM      ### why do you escape the $-sign? Not done with FILEPATH
     sed -i "/DIR_LOG =/c\\DIR_LOG = level2_log/" \$PARAM
     sed -i "/DIR_TEMP =/c\\DIR_TEMP = level2_tmp/" \$PARAM
-    sed -i "/FILE_DEM =/c\\FILE_DEM = input/dem/dem.vrt" \$PARAM
-    sed -i "/DIR_WVPLUT =/c\\DIR_WVPLUT = input/wvdb/" \$PARAM
-    force-l2ps \$FILEPATH \$PARAM
+    sed -i "/FILE_DEM =/c\\FILE_DEM = input/dem/dem.vrt" \$PARAM    ### not sure I understand this here. Is "input" known?
+    sed -i "/DIR_WVPLUT =/c\\DIR_WVPLUT = input/wvdb/" \$PARAM      ### just a note on sed for readability: you can set the pattern delimiter to any other sign to avoid confusion with the "/" of filepaths, e.g. sed '+pattern+c\replacement+'
+    sed -i "/FILE_TILE =/c\\FILE_TILE = $tile" \$PARAM
+    sed -i "/TILE_SIZE =/c\\TILE_SIZE = $TILESIZE" \$PARAM
+    sed -i "/BLOCK_SIZE =/c\\BLOCK_SIZE = $BLOCKSIZE" \$PARAM
+    sed -i "/ORIGIN_LON =/c\\ORIGIN_LON = $ORIGINX" \$PARAM
+    sed -i "/ORIGIN_LAT =/c\\ORIGIN_LAT = $ORIGINY" \$PARAM
+    sed -i "/PROJECTION =/c\\PROJECTION = $CRS" \$PARAM
+    sed -i "/NTHREAD =/c\\NTHREAD = 1/" \$PARAM                     ### probably replaced by a variable
+
+    # preprocess
+    force-l2ps \$FILEPATH \$PARAM > level2_log\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
     """
 
 
