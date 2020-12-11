@@ -105,37 +105,55 @@ process preprocess{
     container 'fegyi001/force'
 
     input:
-    file parameters from auxiliaryFiles
+
     //only process one directory at once
     file data from data.flatten()
-    file 'tileAllow.txt' from tileAllow
+    file cube from projectionFile
+    file tile from tileAllow
 
     output:
     //One BOA image
-    file '**BOA.tif' into boaTiles
+    file '**BOA.tif' into boaFiles
     //One QAI image
     file '**QAI.tif' into qaiTiles
     stdout preprocessLog
 
     """
-    FILEPATH=$data
-    PARAM=$parameters/parameters/level2.prm
-    mkdir level2_wrs
+    BASE=\$(basename $data)
+
+    # make directories
+    mkdir level2_ard
     mkdir level2_log
     mkdir level2_tmp
-    touch queue.txt
-    sed -i "/DIR_LEVEL2 =/c\\DIR_LEVEL2 = level2_wrs/" \$PARAM
-    sed -i "/FILE_QUEUE =/c\\FILE_QUEUE = queue.txt" \$PARAM
+
+    # generate parameterfile from scratch
+    force-parameter . LEVEL2 0
+    PARAM=\$BASE.prm
+    mv *.prm \$PARAM
+
+    # read grid definition
+    CRS=\$(sed '1q;d' $cube)
+    ORIGINX=\$(sed '2q;d' $cube)
+    ORIGINY=\$(sed '3q;d' $cube)
+    TILESIZE=\$(sed '6q;d' $cube)
+    BLOCKSIZE=\$(sed '7q;d' $cube)
+
+    # set parameters
+    sed -i "/DIR_LEVEL2 =/c\\DIR_LEVEL2 = level2_ard/" \$PARAM
     sed -i "/DIR_LOG =/c\\DIR_LOG = level2_log/" \$PARAM
     sed -i "/DIR_TEMP =/c\\DIR_TEMP = level2_tmp/" \$PARAM
     sed -i "/FILE_DEM =/c\\FILE_DEM = input/dem/dem.vrt" \$PARAM
     sed -i "/DIR_WVPLUT =/c\\DIR_WVPLUT = input/wvdb/" \$PARAM
-    sed -i "/DO_REPROJ =/c\\DO_REPROJ = TRUE" \$PARAM
-    sed -i "/DO_TILE =/c\\DO_TILE = TRUE" \$PARAM
-    sed -i "/FILE_TILE =/c\\FILE_TILE = tileAllow.txt" \$PARAM
-    sed -i "/NTHREAD =/c\\NTHREAD = $useCPU" \$PARAM
-    force-l2ps \$FILEPATH \$PARAM
+    sed -i "/FILE_TILE =/c\\FILE_TILE = $tile" \$PARAM
+    sed -i "/TILE_SIZE =/c\\TILE_SIZE = \$TILESIZE" \$PARAM
+    sed -i "/BLOCK_SIZE =/c\\BLOCK_SIZE = \$BLOCKSIZE" \$PARAM
+    sed -i "/ORIGIN_LON =/c\\ORIGIN_LON = \$ORIGINX" \$PARAM
+    sed -i "/ORIGIN_LAT =/c\\ORIGIN_LAT = \$ORIGINY" \$PARAM
+    sed -i "/PROJECTION =/c\\PROJECTION = \$CRS" \$PARAM
+    sed -i "/NTHREAD =/c\\NTHREAD = $useCPU/" \$PARAM
 
+    # preprocess
+    force-l2ps \$FILEPATH \$PARAM > level2_log\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
 
     results=`find level2_wrs/*/*.tif`
     #join tile and filename
