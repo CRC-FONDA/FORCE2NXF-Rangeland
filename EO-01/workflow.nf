@@ -110,15 +110,17 @@ process preprocess{
     file data from data.flatten()
     file cube from projectionFile
     file tile from tileAllow
+    file parameters from auxiliaryFiles
 
     output:
     //One BOA image
-    file '**BOA.tif' into boaFiles
+    file '**BOA.tif' into boaTiles
     //One QAI image
     file '**QAI.tif' into qaiTiles
     stdout preprocessLog
 
     """
+    FILEPATH=$data
     BASE=\$(basename $data)
 
     # make directories
@@ -142,8 +144,8 @@ process preprocess{
     sed -i "/DIR_LEVEL2 =/c\\DIR_LEVEL2 = level2_ard/" \$PARAM
     sed -i "/DIR_LOG =/c\\DIR_LOG = level2_log/" \$PARAM
     sed -i "/DIR_TEMP =/c\\DIR_TEMP = level2_tmp/" \$PARAM
-    sed -i "/FILE_DEM =/c\\FILE_DEM = input/dem/dem.vrt" \$PARAM
-    sed -i "/DIR_WVPLUT =/c\\DIR_WVPLUT = input/wvdb/" \$PARAM
+    sed -i "/FILE_DEM =/c\\FILE_DEM = $parameters/dem/dem.vrt" \$PARAM
+    sed -i "/DIR_WVPLUT =/c\\DIR_WVPLUT = $parameters/wvdb/" \$PARAM
     sed -i "/FILE_TILE =/c\\FILE_TILE = $tile" \$PARAM
     sed -i "/TILE_SIZE =/c\\TILE_SIZE = \$TILESIZE" \$PARAM
     sed -i "/BLOCK_SIZE =/c\\BLOCK_SIZE = \$BLOCKSIZE" \$PARAM
@@ -153,10 +155,10 @@ process preprocess{
     sed -i "/NTHREAD =/c\\NTHREAD = $useCPU/" \$PARAM
 
     # preprocess
-    force-l2ps \$FILEPATH \$PARAM > level2_log\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
+    force-l2ps \$FILEPATH \$PARAM > level2_log/\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
 
-    results=`find level2_wrs/*/*.tif`
     #join tile and filename
+    results=`find level2_ard/*/*.tif`
     for path in \$results; do
        mv \$path \${path%/*}_\${path##*/}
     done;
@@ -165,81 +167,78 @@ process preprocess{
 
 }
 
+//Group by tile, date and sensor
 boaTiles = boaTiles.flatten().map{ x -> [x.simpleName, x]}.groupTuple()
+qaiTiles = qaiTiles.flatten().map{ x -> [x.simpleName, x]}.groupTuple()
 
+//Copy Stream
 boaTiles.into{boaTilesToMerge ; boaTilesDone}
-boaTilesToMerge = boaTilesToMerge.filter{ x -> x[1].size() > 1 }
-boaTilesDone = boaTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
-
-process mergeBOA{
-
-    input:
-    tuple val(id), file('tile/tile?.tif') from boaTilesToMerge
-
-    output:
-    tuple val(id), file('merged.tif') into boaTilesMerged
-
-    """
-    mv tile/tile1.tif "$id".tif
-    gdal_merge.py -q -o $id".tif" -n $NODATA -a_nodata $NODATA \
-    -init $NODATA -of GTiff -co 'INTERLEAVE=BAND' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' \
-    -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" \
-    -co "BLOCKYSIZE=$YBLOCK" $OUT/$TILE/$BASE"_TEMP1.tif" $OUT/$TILE/$BASE"_TEMP2.tif"
-    """
-
-}
-
-boaTilesDone = boaTilesDone.concat(boaTilesMerged)
-
-boaTilesDone.view()
-
-// process processCubeQAI{
-
-//     container 'fegyi001/force'
-
-//     input:
-//     //Run this methode for all qai images seperately
-//     file qai from qaiFiles.flatten()
-//     file 'ard/datacube-definition.prj' from projectionFile
-//     file tileAllow from tileAllow
-
-//     output:
-//     file '**QAI.tif' into qaiTiles
-
-//     """
-//     printf '%s\\n' "$qai"
-//     force-cube "$qai" ard/ near 30
-
-//     results=`find ard/*/*QAI.tif`
-
-//     for path in \$results; do
-//         mv \$path \${path%/*}_\${path##*/}
-//     done;
-//     """
-
-// }
-
-qaiTiles = qaiTiles.flatten().map{ x -> [x.baseName.substring(0,20), x]}.groupTuple()
 qaiTiles.into{qaiTilesToMerge ; qaiTilesDone}
-qaiTilesToMerge = qaiTilesToMerge.filter{ x -> x[1].size() > 1 }
+
+//Find tiles to merge
+boaTilesToMerge = boaTilesToMerge.filter{ x -> x[1].size() > 1 }.map{ x -> [x[0],"cubic",x[1]]}
+qaiTilesToMerge = qaiTilesToMerge.filter{ x -> x[1].size() > 1 }.map{ x -> [x[0],"near",x[1]]}
+
+//Find tiles with only one file
+boaTilesDone = boaTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
 qaiTilesDone = qaiTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
 
-process mergeQAI{
+//combine both to use the same method, without rewriting
+toMerge = boaTilesToMerge.concat(qaiTilesToMerge)
+
+process merge{
+
+    container 'fegyi001/force'
 
     input:
-    tuple val(id), file('tile/tile?.tif') from qaiTilesToMerge
+    tuple val(id), val(resample), file('tile/tile?.tif') from toMerge
+    file cube from projectionFile
 
     output:
-    tuple val(id), file('merged.tif') into qaiTilesMerged
+    tuple val(id), file('**.tif') into tilesMerged
 
     """
-    mv tile/tile1.tif merged.tif
+    RES=30
+    RESAMPLE="$resample"
+
+    INP="tile/"
+    if [[ ! "\$RESAMPLE" =~ "rasterize" ]]; then
+        NODATA=\$(gdalinfo tile/tile1.tif | grep NoData | head -n 1 |  sed 's/ //g' | cut -d '=' -f 2)
+    fi
+
+    TILESIZE=\$(head -n 6 $cube | tail -1 )
+    CHUNKSIZE=\$(head -n 7 $cube | tail -1 )
+
+    XBLOCK=\$(echo \$TILESIZE  \$RES | awk '{print int(\$1/\$2)}')
+    YBLOCK=\$(echo \$CHUNKSIZE \$RES | awk '{print int(\$1/\$2)}')
+
+    mv tile/tile1.tif "$id".tif
+
+    results=`find tile/*.tif`
+    for path in \$results; do
+
+        gdal_merge.py -q -o "out.tif" -n \$NODATA -a_nodata \$NODATA \
+            -init \$NODATA -of GTiff -co 'INTERLEAVE=BAND' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' \
+            -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=\$XBLOCK" \
+            -co "BLOCKYSIZE=\$YBLOCK" "$id".tif "\$path".tif
+
+        #delete merged files
+        rm "$id".tif "\$path"
+
+        mv out.tif "$id".tif
+    done;
     """
 
 }
 
-qaiTilesDone = qaiTilesDone.concat(qaiTilesMerged)
+//Copy channel
+tilesMerged.into{qaiTilesMerged ; boaTilesMerged}
 
+//Filter only boa or qai files
+boaTilesDone = boaTilesDone.concat(boaTilesMerged.filter{ x -> x[1].simpleName.endsWith("_BOA") })
+qaiTilesDone = qaiTilesDone.concat(qaiTilesMerged.filter{ x -> x[1].simpleName.endsWith("_QAI") })
+
+boaTilesDone.view()
 
 class Pair {
     Object a
