@@ -1,7 +1,6 @@
 
 sensors = "LT04,LT05,LE07"
 timeRange = "20060420,20060420"
-shapeFile = "crete.shp" //later aoi.shp
 useCPU = 4
 
 process downloadParams{
@@ -11,11 +10,14 @@ process downloadParams{
 
     output:
     file 'input/' into auxiliaryFiles
-    file 'input/grid/datacube-definition.prj' into projectionFile
+    file 'input/grid/datacube-definition.prj' into cubeFile
+    file 'input/vector/aoi.gpkg' into aoiFile
+    file 'input/dem/' into demFiles
+    file 'input/wvdb/' into wvdbFiles
 
     """
-    wget -O parameters https://box.hu-berlin.de/f/eb61444bd97f4c738038/?dl=1
-    tar -xzf parameters
+    wget -O auxiliary.tar.gz https://box.hu-berlin.de/f/eb61444bd97f4c738038/?dl=1
+    tar -xzf auxiliary.tar.gz
     mv EO-01/input/ input/
     """
 
@@ -26,13 +28,11 @@ process downloadData{
     container 'fegyi001/force'
 
     input:
-    file parameters from auxiliaryFiles
+    file aoi from aoiFile
 
     output:
     //Folders with data of one single image
     file 'data/*/*' into data
-    //Pathes to all these folders
-    file 'queue.txt' into queue
 
     """
     mkdir meta
@@ -41,7 +41,7 @@ process downloadData{
     mkdir data
     touch queue.txt
 
-    force-level1-csd -s $sensors -d $timeRange -c 0,70 meta/ data/ queue.txt input/vector/$shapeFile
+    force-level1-csd -s $sensors -d $timeRange -c 0,70 meta/ data/ queue.txt $aoi
     """
 
 }
@@ -51,33 +51,16 @@ process generateTileAllowList{
     container 'fegyi001/force'
 
     input:
-    file 'ard/datacube-definition.prj' from projectionFile
-    file parameters from auxiliaryFiles
+    file aoi from aoiFile
+    file 'tmp/datacube-definition.prj' from cubeFile    // is there a way to copy the file to this location without specifying the filename?
 
     output:
     //Tile allow for this image
     file 'tileAllow.txt' into tileAllow
 
     """
-    force-tile-extent $parameters/vector/$shapeFile ard/ tileAllow.txt
-    #sed -i '1d' tileAllow.txt
-
-    mkdir higherPars
-
-    cp input/parameters/higher-level_trends.prm higher-level_trends.prm
-    sed -i "/DIR_LOWER =/c\\DIR_LOWER = ard/" higher-level_trends.prm
-    sed -i "/DIR_HIGHER =/c\\DIR_HIGHER = trend/" higher-level_trends.prm
-    sed -i "/DIR_MASK =/c\\DIR_MASK = mask/" higher-level_trends.prm
-    sed -i "/FILE_ENDMEM  =/c\\FILE_ENDMEM = $parameters/endmember/hostert-2003.txt" higher-level_trends.prm
-    sed -i "/FILE_ENDMEM =/c\\FILE_ENDMEM = $parameters/endmember/hostert-2003.txt" higher-level_trends.prm
-
-    while IFS="" read -r t; do
-        X=\${t:1:4}
-        Y=\${t:7:11}
-        cp higher-level_trends.prm higherPars/"\$t.prm"
-        sed -i "s/REPX/\$X/g" higherPars/"\$t.prm"
-        sed -i "s/REPY/\$Y/g" higherPars/"\$t.prm"
-    done < tileAllow.txt
+    force-tile-extent $aoi tmp/ tileAllow.txt
+    rm -r tmp
     """
 
 }
@@ -87,15 +70,15 @@ process generateAnalysisMask{
     container 'fegyi001/force'
 
     input:
-    file 'mask/datacube-definition.prj' from projectionFile
-    file parameters from auxiliaryFiles
+    file aoi from aoiFile
+    file 'mask/datacube-definition.prj' from cubeFile    // is there a way to copy the file to this location without specifying the filename?
 
     output:
     //Mask for whole region
     file 'mask/' into masks
 
     """
-    force-cube $parameters/vector/$shapeFile mask/ rasterize 30
+    force-cube $aoi mask/ rasterize 30
     """
 
 }
@@ -108,8 +91,10 @@ process preprocess{
 
     //only process one directory at once
     file data from data.flatten()
-    file cube from projectionFile
+    file cube from cubeFile
     file tile from tileAllow
+    file dem  from demFiles
+    file wvdb from wvdbFiles
 
     output:
     //One BOA image
@@ -142,8 +127,8 @@ process preprocess{
     sed -i "/DIR_LEVEL2 =/c\\DIR_LEVEL2 = level2_ard/" \$PARAM
     sed -i "/DIR_LOG =/c\\DIR_LOG = level2_log/" \$PARAM
     sed -i "/DIR_TEMP =/c\\DIR_TEMP = level2_tmp/" \$PARAM
-    sed -i "/FILE_DEM =/c\\FILE_DEM = input/dem/dem.vrt" \$PARAM
-    sed -i "/DIR_WVPLUT =/c\\DIR_WVPLUT = input/wvdb/" \$PARAM
+    sed -i "/FILE_DEM =/c\\FILE_DEM = $dem/dem.vrt" \$PARAM
+    sed -i "/DIR_WVPLUT =/c\\DIR_WVPLUT = $wvdb" \$PARAM
     sed -i "/FILE_TILE =/c\\FILE_TILE = $tile" \$PARAM
     sed -i "/TILE_SIZE =/c\\TILE_SIZE = \$TILESIZE" \$PARAM
     sed -i "/BLOCK_SIZE =/c\\BLOCK_SIZE = \$BLOCKSIZE" \$PARAM
@@ -155,7 +140,7 @@ process preprocess{
     # preprocess
     force-l2ps \$FILEPATH \$PARAM > level2_log\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
 
-    results=`find level2_wrs/*/*.tif`
+    results=`find level2_ard/*/*.tif`
     #join tile and filename
     for path in \$results; do
        mv \$path \${path%/*}_\${path##*/}
@@ -200,7 +185,7 @@ boaTilesDone.view()
 //     input:
 //     //Run this methode for all qai images seperately
 //     file qai from qaiFiles.flatten()
-//     file 'ard/datacube-definition.prj' from projectionFile
+//     file 'ard/datacube-definition.prj' from cubeFile
 //     file tileAllow from tileAllow
 
 //     output:
