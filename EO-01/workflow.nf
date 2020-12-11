@@ -176,67 +176,49 @@ boaTiles.into{boaTilesToMerge ; boaTilesDone}
 qaiTiles.into{qaiTilesToMerge ; qaiTilesDone}
 
 //Find tiles to merge
-boaTilesToMerge = boaTilesToMerge.filter{ x -> x[1].size() > 1 }.map{ x -> [x[0],"cubic",x[1]]}
-qaiTilesToMerge = qaiTilesToMerge.filter{ x -> x[1].size() > 1 }.map{ x -> [x[0],"near",x[1]]}
+boaTilesToMerge = boaTilesToMerge.filter{ x -> x[1].size() > 1 }
+qaiTilesToMerge = qaiTilesToMerge.filter{ x -> x[1].size() > 1 }
 
 //Find tiles with only one file
 boaTilesDone = boaTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
 qaiTilesDone = qaiTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
 
-//combine both to use the same method, without rewriting
-toMerge = boaTilesToMerge.concat(qaiTilesToMerge)
-
-process merge{
+process mergeBOA{
 
     container 'fegyi001/force'
 
     input:
-    tuple val(id), val(resample), file('tile/tile?.tif') from toMerge
+    tuple val(id), file('tile/tile?.tif') from boaTilesToMerge
     file cube from projectionFile
 
     output:
-    tuple val(id), file('**.tif') into tilesMerged
+    tuple val(id), file('**.tif') into boaTilesMerged
 
     """
-    RES=30
-    RESAMPLE="$resample"
-
-    INP="tile/"
-    if [[ ! "\$RESAMPLE" =~ "rasterize" ]]; then
-        NODATA=\$(gdalinfo tile/tile1.tif | grep NoData | head -n 1 |  sed 's/ //g' | cut -d '=' -f 2)
-    fi
-
-    TILESIZE=\$(head -n 6 $cube | tail -1 )
-    CHUNKSIZE=\$(head -n 7 $cube | tail -1 )
-
-    XBLOCK=\$(echo \$TILESIZE  \$RES | awk '{print int(\$1/\$2)}')
-    YBLOCK=\$(echo \$CHUNKSIZE \$RES | awk '{print int(\$1/\$2)}')
-
-    mv tile/tile1.tif "$id".tif
-
-    results=`find tile/*.tif`
-    for path in \$results; do
-
-        gdal_merge.py -q -o "out.tif" -n \$NODATA -a_nodata \$NODATA \
-            -init \$NODATA -of GTiff -co 'INTERLEAVE=BAND' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' \
-            -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=\$XBLOCK" \
-            -co "BLOCKYSIZE=\$YBLOCK" "$id".tif "\$path".tif
-
-        #delete merged files
-        rm "$id".tif "\$path"
-
-        mv out.tif "$id".tif
-    done;
+    merge.sh $id cubic 30
     """
 
 }
 
-//Copy channel
-tilesMerged.into{qaiTilesMerged ; boaTilesMerged}
+process mergeQAI{
 
-//Filter only boa or qai files
-boaTilesDone = boaTilesDone.concat(boaTilesMerged.filter{ x -> x[1].simpleName.endsWith("_BOA") })
-qaiTilesDone = qaiTilesDone.concat(qaiTilesMerged.filter{ x -> x[1].simpleName.endsWith("_QAI") })
+    container 'fegyi001/force'
+
+    input:
+    tuple val(id), file('tile/tile?.tif') from qaiTilesToMerge
+    file cube from projectionFile
+
+    output:
+    tuple val(id), file('**.tif') into qaiTilesMerged
+
+    """
+    merge.sh $id near 30
+    """
+
+}
+
+boaTilesDone = boaTilesDone.concat(boaTilesMerged)
+qaiTilesDone = qaiTilesDone.concat(qaiTilesMerged)
 
 boaTilesDone.view()
 
