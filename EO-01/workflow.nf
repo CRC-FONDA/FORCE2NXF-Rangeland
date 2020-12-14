@@ -1,12 +1,13 @@
 
 sensors = "LT04,LT05,LE07"
-timeRange = "20060420,20060420"
+timeRange = "20060420,20060425"
+shapeFile = "aoi.gpkg"
 useCPU = 4
 
 process downloadParams{
 
     //Has to be downloaded anyways, so we can use it only for wget
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     output:
     file 'input/' into auxiliaryFiles
@@ -25,7 +26,7 @@ process downloadParams{
 
 process downloadData{
 
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     input:
     file aoi from aoiFile
@@ -48,7 +49,7 @@ process downloadData{
 
 process generateTileAllowList{
 
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     input:
     file aoi from aoiFile
@@ -67,11 +68,11 @@ process generateTileAllowList{
 
 process generateAnalysisMask{
 
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     input:
     file aoi from aoiFile
-    file 'mask/datacube-definition.prj' from cubeFile    // is there a way to copy the file to this location without specifying the filename?
+    file 'mask/datacube-definition.prj' from cubeFile
 
     output:
     //Mask for whole region
@@ -85,7 +86,7 @@ process generateAnalysisMask{
 
 process preprocess{
     
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     input:
 
@@ -98,12 +99,13 @@ process preprocess{
 
     output:
     //One BOA image
-    file '**BOA.tif' into boaFiles
+    file '**BOA.tif' into boaTiles
     //One QAI image
     file '**QAI.tif' into qaiTiles
     stdout preprocessLog
 
     """
+    FILEPATH=$data
     BASE=\$(basename $data)
 
     # make directories
@@ -138,10 +140,9 @@ process preprocess{
     sed -i "/NTHREAD =/c\\NTHREAD = $useCPU/" \$PARAM
 
     # preprocess
-    force-l2ps \$FILEPATH \$PARAM > level2_log\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
+    force-l2ps \$FILEPATH \$PARAM > level2_log/\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
 
     results=`find level2_ard/*/*.tif`
-    #join tile and filename
     for path in \$results; do
        mv \$path \${path%/*}_\${path##*/}
     done;
@@ -150,121 +151,104 @@ process preprocess{
 
 }
 
+//Group by tile, date and sensor
 boaTiles = boaTiles.flatten().map{ x -> [x.simpleName, x]}.groupTuple()
+qaiTiles = qaiTiles.flatten().map{ x -> [x.simpleName, x]}.groupTuple()
 
+//Copy Stream
 boaTiles.into{boaTilesToMerge ; boaTilesDone}
+qaiTiles.into{qaiTilesToMerge ; qaiTilesDone}
+
+//Find tiles to merge
 boaTilesToMerge = boaTilesToMerge.filter{ x -> x[1].size() > 1 }
+qaiTilesToMerge = qaiTilesToMerge.filter{ x -> x[1].size() > 1 }
+
+//Find tiles with only one file
 boaTilesDone = boaTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
+qaiTilesDone = qaiTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
 
 process mergeBOA{
 
+    container 'davidfrantz/force'
+
     input:
     tuple val(id), file('tile/tile?.tif') from boaTilesToMerge
+    file cube from projectionFile
 
     output:
-    tuple val(id), file('merged.tif') into boaTilesMerged
+    tuple val(id), file('**.tif') into boaTilesMerged
 
     """
-    mv tile/tile1.tif "$id".tif
-    gdal_merge.py -q -o $id".tif" -n $NODATA -a_nodata $NODATA \
-    -init $NODATA -of GTiff -co 'INTERLEAVE=BAND' -co 'COMPRESS=LZW' -co 'PREDICTOR=2' \
-    -co 'NUM_THREADS=ALL_CPUS' -co 'BIGTIFF=YES' -co "BLOCKXSIZE=$XBLOCK" \
-    -co "BLOCKYSIZE=$YBLOCK" $OUT/$TILE/$BASE"_TEMP1.tif" $OUT/$TILE/$BASE"_TEMP2.tif"
+    merge.sh $id cubic 30
     """
 
 }
-
-boaTilesDone = boaTilesDone.concat(boaTilesMerged)
-
-boaTilesDone.view()
-
-// process processCubeQAI{
-
-//     container 'fegyi001/force'
-
-//     input:
-//     //Run this methode for all qai images seperately
-//     file qai from qaiFiles.flatten()
-//     file 'ard/datacube-definition.prj' from cubeFile
-//     file tileAllow from tileAllow
-
-//     output:
-//     file '**QAI.tif' into qaiTiles
-
-//     """
-//     printf '%s\\n' "$qai"
-//     force-cube "$qai" ard/ near 30
-
-//     results=`find ard/*/*QAI.tif`
-
-//     for path in \$results; do
-//         mv \$path \${path%/*}_\${path##*/}
-//     done;
-//     """
-
-// }
-
-qaiTiles = qaiTiles.flatten().map{ x -> [x.baseName.substring(0,20), x]}.groupTuple()
-qaiTiles.into{qaiTilesToMerge ; qaiTilesDone}
-qaiTilesToMerge = qaiTilesToMerge.filter{ x -> x[1].size() > 1 }
-qaiTilesDone = qaiTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
 
 process mergeQAI{
 
+    container 'davidfrantz/force'
+
     input:
     tuple val(id), file('tile/tile?.tif') from qaiTilesToMerge
+    file cube from projectionFile
 
     output:
-    tuple val(id), file('merged.tif') into qaiTilesMerged
+    tuple val(id), file('**.tif') into qaiTilesMerged
 
     """
-    mv tile/tile1.tif merged.tif
+    merge.sh $id near 30
     """
 
 }
 
-qaiTilesDone = qaiTilesDone.concat(qaiTilesMerged)
+//Concat merged list with single images, group by tile over time
+boaTilesDoneAndMerged = boaTilesMerged.concat(boaTilesDone).map{ x -> [x[0].substring(0,11), x[1]]}.groupTuple()
+qaiTilesDoneAndMerged = qaiTilesMerged.concat(qaiTilesDone).map{ x -> [x[0].substring(0,11), x[1]]}.groupTuple()
 
+process processHigherLevel{
 
-class Pair {
-    Object a
-    Object b
-    Object c
+    container 'davidfrantz/force'
 
-    Pair(a, b, c) {          
-        this.a = a
-        this.b = b
-        this.c = c
-    }
+    input:
+    tuple val(tile), file("ard/*") from boaTilesDoneAndMerged
+    file 'ard/datacube-definition.prj' from projectionFile
+    file mask from masks
+    file parameters from auxiliaryFiles
+
+    //output:
+    //file higherPar into higherPar2
+
+    """
+
+    PARAM=$parameters/parameters/higher-level_trends.prm
+    
+    #Replace pathes
+    sed -i "/DIR_LOWER =/c\\DIR_LOWER = ard/" \$PARAM
+    sed -i "/DIR_HIGHER =/c\\DIR_HIGHER = trend/" \$PARAM
+    sed -i "/DIR_MASK =/c\\DIR_MASK = mask/" \$PARAM
+    sed -i "/FILE_ENDMEM  =/c\\FILE_ENDMEM = $parameters/endmember/hostert-2003.txt" \$PARAM
+    sed -i "/FILE_ENDMEM =/c\\FILE_ENDMEM = $parameters/endmember/hostert-2003.txt" \$PARAM
+
+    #Replace Tile to process
+    TILE="$tile"
+    X=\${TILE:1:4}
+    Y=\${TILE:7:11}
+    sed -i "s/REPX/\$X/g" \$PARAM
+    sed -i "s/REPY/\$Y/g" \$PARAM
+
+    echo \$X
+    echo \$Y
+    ls ard/
+    mkdir trend
+    
+    force-higher-level \$PARAM
+    """
+
 }
-
-//own Pair, otherwise flat would unzip tuples
-// higherParsFlat = higherPars.map{x-> x[2].collect{ y -> new Pair(x[0], x[1], y)}}.flatten().map{x -> [x.a, x.b, x.c]}
-
-// process processHigherLevel{
-
-//     container 'fegyi001/force'
-
-//     input:
-//     //Process higher level for each filename seperately
-//     tuple val(filename), file(ard), file(higherPar) from higherParsFlat
-//     file mask from masks
-//     file parameters from auxiliaryFiles
-
-//     output:
-//     file higherPar into higherPar2
-
-//     """
-//     echo $filename
-//     mkdir trend
-//     force-higher-level $higherPar
-//     """
-
-// }
 
 // process processMosaic{
 
-//     container 'fegyi001/force'
+//     container 'davidfrantz/force'
 
 //     input:
 //     //Use higherpar files of all images
@@ -284,7 +268,7 @@ class Pair {
 
 // process processPyramid{
 
-//     container 'fegyi001/force'
+//     container 'davidfrantz/force'
 
 //     input:
 //     file mosaic from masaics.flatten()
