@@ -173,7 +173,7 @@ process mergeBOA{
 
     input:
     tuple val(id), file('tile/tile?.tif') from boaTilesToMerge
-    file cube from projectionFile
+    file cube from cubeFile
 
     output:
     tuple val(id), file('**.tif') into boaTilesMerged
@@ -190,7 +190,7 @@ process mergeQAI{
 
     input:
     tuple val(id), file('tile/tile?.tif') from qaiTilesToMerge
-    file cube from projectionFile
+    file cube from cubeFile
 
     output:
     tuple val(id), file('**.tif') into qaiTilesMerged
@@ -211,7 +211,7 @@ process processHigherLevel{
 
     input:
     tuple val(tile), file("ard/*") from boaTilesDoneAndMerged
-    file 'ard/datacube-definition.prj' from projectionFile
+    file 'ard/datacube-definition.prj' from cubeFile
     file mask from masks
     file parameters from auxiliaryFiles
 
