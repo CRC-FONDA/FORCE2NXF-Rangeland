@@ -1,10 +1,11 @@
 
-sensors = "LT04,LT05,LE07"
+sensors_level1 = "LT04,LT05,LE07"
+sensors_level2 = "LND04 LND05 LND07"
 timeRange = "20060420,20060425"
-shapeFile = "aoi.gpkg"
+resolution = 30
 useCPU = 4
 
-process downloadParams{
+process downloadAuxiliary{
 
     //Has to be downloaded anyways, so we can use it only for wget
     container 'davidfrantz/force'
@@ -15,6 +16,7 @@ process downloadParams{
     file 'input/vector/aoi.gpkg' into aoiFile
     file 'input/dem/' into demFiles
     file 'input/wvdb/' into wvdbFiles
+    file 'input/endmember/hostert-2003.txt' into endmemberFile
 
     """
     wget -O auxiliary.tar.gz https://box.hu-berlin.de/f/eb61444bd97f4c738038/?dl=1
@@ -37,12 +39,12 @@ process downloadData{
 
     """
     mkdir meta
-    force-level1-csd -u -s $sensors meta
+    force-level1-csd -u -s $sensors_level1 meta
 
     mkdir data
-    touch queue.txt
+    #touch queue.txt
 
-    force-level1-csd -s $sensors -d $timeRange -c 0,70 meta/ data/ queue.txt $aoi
+    force-level1-csd -s $sensors_level1 -d $timeRange -c 0,70 meta/ data/ queue.txt $aoi
     """
 
 }
@@ -79,7 +81,7 @@ process generateAnalysisMask{
     file 'mask/' into masks
 
     """
-    force-cube $aoi mask/ rasterize 30
+    force-cube $aoi mask/ rasterize $resolution
     """
 
 }
@@ -179,7 +181,7 @@ process mergeBOA{
     tuple val(id), file('**.tif') into boaTilesMerged
 
     """
-    merge.sh $id cubic 30
+    merge.sh $id cubic $resolution
     """
 
 }
@@ -196,7 +198,7 @@ process mergeQAI{
     tuple val(id), file('**.tif') into qaiTilesMerged
 
     """
-    merge.sh $id near 30
+    merge.sh $id near $resolution
     """
 
 }
@@ -213,28 +215,62 @@ process processHigherLevel{
     tuple val(tile), file("ard/*") from boaTilesDoneAndMerged
     file 'ard/datacube-definition.prj' from cubeFile
     file mask from masks
-    file parameters from auxiliaryFiles
+    file endmember from endmemberFile
 
-    //output:
-    //file higherPar into higherPar2
+    output:
+    file '**.tif' into trendFiles
+
 
     """
+    # generate parameterfile from scratch
+    force-parameter . TSA 0
+    PARAM=trend_\$tile.prm
+    mv *.prm \$PARAM
 
-    PARAM=$parameters/parameters/higher-level_trends.prm
-    
+    # set parameters
+
     #Replace pathes
-    sed -i "/DIR_LOWER =/c\\DIR_LOWER = ard/" \$PARAM
-    sed -i "/DIR_HIGHER =/c\\DIR_HIGHER = trend/" \$PARAM
-    sed -i "/DIR_MASK =/c\\DIR_MASK = mask/" \$PARAM
-    sed -i "/FILE_ENDMEM  =/c\\FILE_ENDMEM = $parameters/endmember/hostert-2003.txt" \$PARAM
-    sed -i "/FILE_ENDMEM =/c\\FILE_ENDMEM = $parameters/endmember/hostert-2003.txt" \$PARAM
+    sed -i "/DIR_LOWER /c\\DIR_LOWER = ard/" \$PARAM
+    sed -i "/DIR_HIGHER /c\\DIR_HIGHER = trend/" \$PARAM
+    sed -i "/DIR_MASK /c\\DIR_MASK = mask/" \$PARAM
+    sed -i "/BASE_MASK /c\\BASE_MASK = aoi.tif/" \$PARAM
+    sed -i "/FILE_ENDMEM /c\\FILE_ENDMEM = $endmember" \$PARAM
 
-    #Replace Tile to process
+    # threading
+    sed -i "/NTHREAD_READ /c\\NTHREAD_READ = 1" \$PARAM              # might need some modification
+    sed -i "/NTHREAD_COMPUTE /c\\NTHREAD_COMPUTE = $useCPU" \$PARAM  # might need some modification
+    sed -i "/NTHREAD_WRITE /c\\NTHREAD_WRITE = 1" \$PARAM            # might need some modification
+
+    # replace Tile to process
     TILE="$tile"
     X=\${TILE:1:4}
     Y=\${TILE:7:11}
-    sed -i "s/REPX/\$X/g" \$PARAM
-    sed -i "s/REPY/\$Y/g" \$PARAM
+    sed -i "/X_TILE_RANGE /c\\X_TILE_RANGE = \$X \$X" \$PARAM
+    sed -i "/Y_TILE_RANGE /c\\Y_TILE_RANGE = \$Y \$Y" \$PARAM
+
+    # resolution
+    sed -i "/RESOLUTION /c\\RESOLUTION = $resolution" \$PARAM
+
+    # sensors
+    sed -i "/SENSORS /c\\SENSORS = $sensors_level2" \$PARAM
+
+    # date range
+    T0=\$(echo $timeRange | cut -d ',' -f 1 | cut -c 1-4)
+    T1=\$(echo $timeRange | cut -d ',' -f 2 | cut -c 1-4)
+    sed -i "/DATE_RANGE /c\\DATE_RANGE = \$T0-01-01 \$T1-01-01" \$PARAM
+
+    # spectral index
+    sed -i "/INDEX /c\\INDEX = SMA" \$PARAM
+    
+    # interpolation
+    sed -i "/INT_DAY /c\\INT_DAY = 8" \$PARAM
+    sed -i "/OUTPUT_TSI /c\\OUTPUT_TSI = TRUE" \$PARAM
+
+    # polar metrics
+    sed -i "/POL /c\\POL = VPS VBL VSA" \$PARAM
+    sed -i "/OUTPUT_POL /c\\OUTPUT_POL = TRUE" \$PARAM
+    sed -i "/OUTPUT_TRO /c\\OUTPUT_TRO = TRUE" \$PARAM
+    sed -i "/OUTPUT_CAO /c\\OUTPUT_CAO = TRUE" \$PARAM
 
     echo \$X
     echo \$Y
