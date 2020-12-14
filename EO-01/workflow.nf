@@ -212,7 +212,7 @@ process processHigherLevel{
     container 'davidfrantz/force'
 
     input:
-    tuple val(tile), file("ard/*") from boaTilesDoneAndMerged
+    tuple val(tile), file("ard/*"), file("ard/*") from boaTilesDoneAndMerged.join(qaiTilesDoneAndMerged)
     file 'ard/datacube-definition.prj' from cubeFile
     file mask from masks
     file endmember from endmemberFile
