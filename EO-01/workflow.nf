@@ -78,10 +78,16 @@ process generateAnalysisMask{
 
     output:
     //Mask for whole region
-    file 'mask/' into masks
+    file '**.tif' into masks
 
     """
     force-cube $aoi mask/ rasterize $resolution
+
+    results=`find mask/*/*.tif`
+    for path in \$results; do
+       mv \$path \${path%/*}_\${path##*/}
+    done;
+
     """
 
 }
@@ -212,9 +218,8 @@ process processHigherLevel{
     container 'davidfrantz/force'
 
     input:
-    tuple val(tile), file("ard/*"), file("ard/*") from boaTilesDoneAndMerged.join(qaiTilesDoneAndMerged)
+    tuple val(tile), file("ard/${tile}/*"), file("ard/${tile}/*"), file("mask/${tile}/aoi.tif") from boaTilesDoneAndMerged.join(qaiTilesDoneAndMerged).join(masks.flatten().map{ x -> [x.simpleName.substring(0,11), x]})
     file 'ard/datacube-definition.prj' from cubeFile
-    file mask from masks
     file endmember from endmemberFile
 
     output:
@@ -224,7 +229,7 @@ process processHigherLevel{
     """
     # generate parameterfile from scratch
     force-parameter . TSA 0
-    PARAM=trend_\$tile.prm
+    PARAM=trend_"$tile".prm
     mv *.prm \$PARAM
 
     # set parameters
