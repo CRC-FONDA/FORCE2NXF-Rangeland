@@ -93,6 +93,8 @@ process generateAnalysisMask{
 }
 
 process preprocess{
+
+    tag {data.simpleName}
     
     container 'davidfrantz/force'
 
@@ -177,6 +179,8 @@ qaiTilesDone = qaiTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1
 
 process mergeBOA{
 
+    tag {id}
+
     container 'davidfrantz/force'
 
     input:
@@ -193,6 +197,8 @@ process mergeBOA{
 }
 
 process mergeQAI{
+
+    tag {id}
 
     container 'davidfrantz/force'
 
@@ -217,6 +223,8 @@ process processHigherLevel{
 
     container 'davidfrantz/force'
 
+    tag {tile}
+
     input:
     tuple val(tile), file("ard/${tile}/*"), file("ard/${tile}/*"), file("mask/${tile}/aoi.tif") from boaTilesDoneAndMerged.join(qaiTilesDoneAndMerged).join(masks.flatten().map{ x -> [x.simpleName.substring(0,11), x]})
     file 'ard/datacube-definition.prj' from cubeFile
@@ -227,6 +235,12 @@ process processHigherLevel{
 
 
     """
+
+    results=`find ard/$tile/*.tif`
+    for path in \$results; do
+       mv \$path ard/$tile/\${path##*$tile"_"}
+    done;
+
     # generate parameterfile from scratch
     force-parameter . TSA 0
     PARAM=trend_"$tile".prm
@@ -238,7 +252,7 @@ process processHigherLevel{
     sed -i "/DIR_LOWER /c\\DIR_LOWER = ard/" \$PARAM
     sed -i "/DIR_HIGHER /c\\DIR_HIGHER = trend/" \$PARAM
     sed -i "/DIR_MASK /c\\DIR_MASK = mask/" \$PARAM
-    sed -i "/BASE_MASK /c\\BASE_MASK = aoi.tif/" \$PARAM
+    sed -i "/BASE_MASK /c\\BASE_MASK = aoi.tif" \$PARAM
     sed -i "/FILE_ENDMEM /c\\FILE_ENDMEM = $endmember" \$PARAM
 
     # threading
@@ -276,6 +290,10 @@ process processHigherLevel{
     sed -i "/OUTPUT_POL /c\\OUTPUT_POL = TRUE" \$PARAM
     sed -i "/OUTPUT_TRO /c\\OUTPUT_TRO = TRUE" \$PARAM
     sed -i "/OUTPUT_CAO /c\\OUTPUT_CAO = TRUE" \$PARAM
+
+    sed -i "/++PARAM_TSA_END++/c\\STANDARDIZE_POL = NONE" \$PARAM
+    echo "OUTPUT_POL = TRUE" >> \$PARAM
+    echo "++PARAM_TSA_END++" >> \$PARAM
 
     echo \$X
     echo \$Y
