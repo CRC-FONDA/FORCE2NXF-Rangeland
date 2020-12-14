@@ -1,13 +1,13 @@
 
 sensors = "LT04,LT05,LE07"
-timeRange = "20060420,20060420"
-shapeFile = "crete.shp" //later aoi.shp
+timeRange = "20060420,20060425"
+shapeFile = "aoi.gpkg"
 useCPU = 4
 
 process downloadParams{
 
     //Has to be downloaded anyways, so we can use it only for wget
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     output:
     file 'input/' into auxiliaryFiles
@@ -23,7 +23,7 @@ process downloadParams{
 
 process downloadData{
 
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     input:
     file parameters from auxiliaryFiles
@@ -48,7 +48,7 @@ process downloadData{
 
 process generateTileAllowList{
 
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     input:
     file 'ard/datacube-definition.prj' from projectionFile
@@ -66,7 +66,7 @@ process generateTileAllowList{
 
 process generateAnalysisMask{
 
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     input:
     file 'mask/datacube-definition.prj' from projectionFile
@@ -84,7 +84,7 @@ process generateAnalysisMask{
 
 process preprocess{
     
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     input:
 
@@ -167,7 +167,7 @@ qaiTilesDone = qaiTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1
 
 process mergeBOA{
 
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     input:
     tuple val(id), file('tile/tile?.tif') from boaTilesToMerge
@@ -184,7 +184,7 @@ process mergeBOA{
 
 process mergeQAI{
 
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     input:
     tuple val(id), file('tile/tile?.tif') from qaiTilesToMerge
@@ -200,15 +200,15 @@ process mergeQAI{
 }
 
 //Concat merged list with single images, group by tile over time
-boaTilesDone = boaTilesDone.concat(boaTilesMerged).map{ x -> [x[0].substring(0,11), x[1]]}.groupTuple()
-qaiTilesDone = qaiTilesDone.concat(qaiTilesMerged).map{ x -> [x[0].substring(0,11), x[1]]}.groupTuple()
+boaTilesDoneAndMerged = boaTilesMerged.concat(boaTilesDone).map{ x -> [x[0].substring(0,11), x[1]]}.groupTuple()
+qaiTilesDoneAndMerged = qaiTilesMerged.concat(qaiTilesDone).map{ x -> [x[0].substring(0,11), x[1]]}.groupTuple()
 
 process processHigherLevel{
 
-    container 'fegyi001/force'
+    container 'davidfrantz/force'
 
     input:
-    tuple val(tile), file("ard/*") from boaTilesDone
+    tuple val(tile), file("ard/*") from boaTilesDoneAndMerged
     file 'ard/datacube-definition.prj' from projectionFile
     file mask from masks
     file parameters from auxiliaryFiles
@@ -246,7 +246,7 @@ process processHigherLevel{
 
 // process processMosaic{
 
-//     container 'fegyi001/force'
+//     container 'davidfrantz/force'
 
 //     input:
 //     //Use higherpar files of all images
@@ -266,7 +266,7 @@ process processHigherLevel{
 
 // process processPyramid{
 
-//     container 'fegyi001/force'
+//     container 'davidfrantz/force'
 
 //     input:
 //     file mosaic from masaics.flatten()
