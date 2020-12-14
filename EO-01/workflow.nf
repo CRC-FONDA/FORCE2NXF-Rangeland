@@ -42,7 +42,7 @@ process downloadData{
     force-level1-csd -u -s $sensors_level1 meta
 
     mkdir data
-    touch queue.txt
+    #touch queue.txt
 
     force-level1-csd -s $sensors_level1 -d $timeRange -c 0,70 meta/ data/ queue.txt $aoi
     """
