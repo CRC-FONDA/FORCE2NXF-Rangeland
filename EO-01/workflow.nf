@@ -152,7 +152,7 @@ process preprocess{
     # preprocess
     force-l2ps \$FILEPATH \$PARAM > level2_log/\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
 
-    results=`find level2_ard/*/*.tif`
+    results=`find level2_ard -name '*.tif'`
     for path in \$results; do
        mv \$path \${path%/*}_\${path##*/}
     done;
