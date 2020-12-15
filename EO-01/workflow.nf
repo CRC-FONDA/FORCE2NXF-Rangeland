@@ -1,9 +1,9 @@
 
 sensors_level1 = "LT04,LT05,LE07"
 sensors_level2 = "LND04 LND05 LND07"
-timeRange = "20060420,20060425"
+timeRange = "20060420,20060430"
 resolution = 30
-useCPU = 4
+useCPU = 2
 
 process downloadAuxiliary{
 
@@ -95,8 +95,10 @@ process generateAnalysisMask{
 process preprocess{
 
     tag {data.simpleName}
-    
+
     container 'davidfrantz/force'
+
+    maxForks 56
 
     input:
 
@@ -109,9 +111,9 @@ process preprocess{
 
     output:
     //One BOA image
-    file '**BOA.tif' into boaTiles
+    file '**BOA.tif' optional true into boaTiles
     //One QAI image
-    file '**QAI.tif' into qaiTiles
+    file '**QAI.tif' optional true into qaiTiles
     stdout preprocessLog
 
     """
@@ -191,7 +193,7 @@ process mergeBOA{
     tuple val(id), file('**.tif') into boaTilesMerged
 
     """
-    merge.sh $id cubic $resolution
+    merge.sh $id $cube $resolution
     """
 
 }
