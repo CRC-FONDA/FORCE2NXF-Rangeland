@@ -136,18 +136,18 @@ process preprocess{
     BLOCKSIZE=\$(sed '7q;d' $cube)
 
     # set parameters
-    sed -i "/DIR_LEVEL2 =/c\\DIR_LEVEL2 = level2_ard/" \$PARAM
-    sed -i "/DIR_LOG =/c\\DIR_LOG = level2_log/" \$PARAM
-    sed -i "/DIR_TEMP =/c\\DIR_TEMP = level2_tmp/" \$PARAM
-    sed -i "/FILE_DEM =/c\\FILE_DEM = $dem/dem.vrt" \$PARAM
-    sed -i "/DIR_WVPLUT =/c\\DIR_WVPLUT = $wvdb" \$PARAM
-    sed -i "/FILE_TILE =/c\\FILE_TILE = $tile" \$PARAM
-    sed -i "/TILE_SIZE =/c\\TILE_SIZE = \$TILESIZE" \$PARAM
-    sed -i "/BLOCK_SIZE =/c\\BLOCK_SIZE = \$BLOCKSIZE" \$PARAM
-    sed -i "/ORIGIN_LON =/c\\ORIGIN_LON = \$ORIGINX" \$PARAM
-    sed -i "/ORIGIN_LAT =/c\\ORIGIN_LAT = \$ORIGINY" \$PARAM
-    sed -i "/PROJECTION =/c\\PROJECTION = \$CRS" \$PARAM
-    sed -i "/NTHREAD =/c\\NTHREAD = $useCPU/" \$PARAM
+    sed -i "/^DIR_LEVEL2 /c\\DIR_LEVEL2 = level2_ard/" \$PARAM
+    sed -i "/^DIR_LOG /c\\DIR_LOG = level2_log/" \$PARAM
+    sed -i "/^DIR_TEMP /c\\DIR_TEMP = level2_tmp/" \$PARAM
+    sed -i "/^FILE_DEM /c\\FILE_DEM = $dem/dem.vrt" \$PARAM
+    sed -i "/^DIR_WVPLUT /c\\DIR_WVPLUT = $wvdb" \$PARAM
+    sed -i "/^FILE_TILE /c\\FILE_TILE = $tile" \$PARAM
+    sed -i "/^TILE_SIZE /c\\TILE_SIZE = \$TILESIZE" \$PARAM
+    sed -i "/^BLOCK_SIZE /c\\BLOCK_SIZE = \$BLOCKSIZE" \$PARAM
+    sed -i "/^ORIGIN_LON /c\\ORIGIN_LON = \$ORIGINX" \$PARAM
+    sed -i "/^ORIGIN_LAT /c\\ORIGIN_LAT = \$ORIGINY" \$PARAM
+    sed -i "/^PROJECTION /c\\PROJECTION = \$CRS" \$PARAM
+    sed -i "/^NTHREAD /c\\NTHREAD = $useCPU/" \$PARAM
 
     # preprocess
     force-l2ps \$FILEPATH \$PARAM > level2_log/\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
@@ -249,51 +249,47 @@ process processHigherLevel{
     # set parameters
 
     #Replace pathes
-    sed -i "/DIR_LOWER /c\\DIR_LOWER = ard/" \$PARAM
-    sed -i "/DIR_HIGHER /c\\DIR_HIGHER = trend/" \$PARAM
-    sed -i "/DIR_MASK /c\\DIR_MASK = mask/" \$PARAM
-    sed -i "/BASE_MASK /c\\BASE_MASK = aoi.tif" \$PARAM
-    sed -i "/FILE_ENDMEM /c\\FILE_ENDMEM = $endmember" \$PARAM
+    sed -i "/^DIR_LOWER /c\\DIR_LOWER = ard/" \$PARAM
+    sed -i "/^DIR_HIGHER /c\\DIR_HIGHER = trend/" \$PARAM
+    sed -i "/^DIR_MASK /c\\DIR_MASK = mask/" \$PARAM
+    sed -i "/^BASE_MASK /c\\BASE_MASK = aoi.tif" \$PARAM
+    sed -i "/^FILE_ENDMEM /c\\FILE_ENDMEM = $endmember" \$PARAM
 
     # threading
-    sed -i "/NTHREAD_READ /c\\NTHREAD_READ = 1" \$PARAM              # might need some modification
-    sed -i "/NTHREAD_COMPUTE /c\\NTHREAD_COMPUTE = $useCPU" \$PARAM  # might need some modification
-    sed -i "/NTHREAD_WRITE /c\\NTHREAD_WRITE = 1" \$PARAM            # might need some modification
+    sed -i "/^NTHREAD_READ /c\\NTHREAD_READ = 1" \$PARAM              # might need some modification
+    sed -i "/^NTHREAD_COMPUTE /c\\NTHREAD_COMPUTE = $useCPU" \$PARAM  # might need some modification
+    sed -i "/^NTHREAD_WRITE /c\\NTHREAD_WRITE = 1" \$PARAM            # might need some modification
 
     # replace Tile to process
     TILE="$tile"
     X=\${TILE:1:4}
     Y=\${TILE:7:11}
-    sed -i "/X_TILE_RANGE /c\\X_TILE_RANGE = \$X \$X" \$PARAM
-    sed -i "/Y_TILE_RANGE /c\\Y_TILE_RANGE = \$Y \$Y" \$PARAM
+    sed -i "/^X_TILE_RANGE /c\\X_TILE_RANGE = \$X \$X" \$PARAM
+    sed -i "/^Y_TILE_RANGE /c\\Y_TILE_RANGE = \$Y \$Y" \$PARAM
 
     # resolution
-    sed -i "/RESOLUTION /c\\RESOLUTION = $resolution" \$PARAM
+    sed -i "/^RESOLUTION /c\\RESOLUTION = $resolution" \$PARAM
 
     # sensors
-    sed -i "/SENSORS /c\\SENSORS = $sensors_level2" \$PARAM
+    sed -i "/^SENSORS /c\\SENSORS = $sensors_level2" \$PARAM
 
     # date range
     T0=\$(echo $timeRange | cut -d ',' -f 1 | cut -c 1-4)
     T1=\$(echo $timeRange | cut -d ',' -f 2 | cut -c 1-4)
-    sed -i "/DATE_RANGE /c\\DATE_RANGE = \$T0-01-01 \$T1-01-01" \$PARAM
+    sed -i "/^DATE_RANGE /c\\DATE_RANGE = \$T0-01-01 \$T1-01-01" \$PARAM
 
     # spectral index
-    sed -i "/INDEX /c\\INDEX = SMA" \$PARAM
+    sed -i "/^INDEX /c\\INDEX = SMA" \$PARAM
     
     # interpolation
-    sed -i "/INT_DAY /c\\INT_DAY = 8" \$PARAM
-    sed -i "/OUTPUT_TSI /c\\OUTPUT_TSI = TRUE" \$PARAM
+    sed -i "/^INT_DAY /c\\INT_DAY = 8" \$PARAM
+    sed -i "/^OUTPUT_TSI /c\\OUTPUT_TSI = TRUE" \$PARAM
 
     # polar metrics
-    sed -i "/POL /c\\POL = VPS VBL VSA" \$PARAM
-    sed -i "/OUTPUT_POL /c\\OUTPUT_POL = TRUE" \$PARAM
-    sed -i "/OUTPUT_TRO /c\\OUTPUT_TRO = TRUE" \$PARAM
-    sed -i "/OUTPUT_CAO /c\\OUTPUT_CAO = TRUE" \$PARAM
-
-    sed -i "/++PARAM_TSA_END++/c\\STANDARDIZE_POL = NONE" \$PARAM
-    echo "OUTPUT_POL = TRUE" >> \$PARAM
-    echo "++PARAM_TSA_END++" >> \$PARAM
+    sed -i "/^POL /c\\POL = VPS VBL VSA" \$PARAM
+    sed -i "/^OUTPUT_POL /c\\OUTPUT_POL = TRUE" \$PARAM
+    sed -i "/^OUTPUT_TRO /c\\OUTPUT_TRO = TRUE" \$PARAM
+    sed -i "/^OUTPUT_CAO /c\\OUTPUT_CAO = TRUE" \$PARAM
 
     echo \$X
     echo \$Y
