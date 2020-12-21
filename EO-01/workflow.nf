@@ -1,7 +1,7 @@
 
-sensors_level1 = "LT04,LT05,LE07"
+sensors_level1 = "LT04,LT05,LE07,S2A"
 sensors_level2 = "LND04 LND05 LND07"
-timeRange = "20060420,20060430"
+timeRange = "19900101,20061212"
 resolution = 30
 useCPU = 2
 
@@ -98,7 +98,7 @@ process preprocess{
 
     container 'davidfrantz/force'
 
-    maxForks 56
+    maxForks 6
 
     input:
 
@@ -233,7 +233,7 @@ process processHigherLevel{
     file endmember from endmemberFile
 
     output:
-    file '**.tif' into trendFiles
+    file 'trend/*.tif' into trendFiles
 
 
     """
@@ -299,44 +299,64 @@ process processHigherLevel{
     mkdir trend
     
     force-higher-level \$PARAM
+
+    results=`find trend -name '*.tif'`
+    for path in \$results; do
+       mv \$path \${path%/*}_\${path##*/}
+    done;
     """
 
 }
 
-// process processMosaic{
+trendFiles = trendFiles.flatten().map{ x -> [x.simpleName.substring(12), x]}.groupTuple()
 
-//     container 'davidfrantz/force'
+trendFiles.into{ trendFiles1; trendFiles2 }
 
-//     input:
-//     //Use higherpar files of all images
-//     file 'higher/parameters/*' from higherPar2.flatten().unique{ x -> x.baseName }.buffer( size: Integer.MAX_VALUE, remainder: true ).unique()
-//     //Use only one tile allow, should be joined instead.
-//     file 'higher/tile.txt' from tileAllow.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
+process processMosaic{
 
-//     output:
-//     file 'higher/mosaic/*.vrt' into masaics
+    tag {id}
+    container 'davidfrantz/force'
 
-//     """
-//     mv higher/tile.txt1 higher/tiles.txt
-//     force-mosaic higher
-//     """
+    input:
+    tuple val('id'), file('trend/*') from trendFiles1
+    file 'trend/datacube-definition.prj' from cubeFile
+    output:
+    tuple val(id), file('trend/mosaic/*.vrt') into mosaics
 
-// }
+    """
+    results=`find trend/*.tif`
+    for path in \$results; do
+        mkdir \${path%_$id*}
+        mv \$path \${path%_$id*}/$id".tif"
+    done;
+    force-mosaic trend/
+    """
 
-// process processPyramid{
+}
 
-//     container 'davidfrantz/force'
+process processPyramid{
 
-//     input:
-//     file mosaic from masaics.flatten()
+    tag {id}
+    publishDir "trend", mode:'copy'
+    container 'davidfrantz/force'
 
-//     output:
-//     stdout result
+    input:
+    tuple val('id'), file('trend/*'), file(mosaic: 'trend/mosaik/*') from trendFiles2.join(mosaics)
+    file 'trend/datacube-definition.prj' from cubeFile
+    
+    output:
+    file('**') into trends
 
-//     """
-//     force-pyramid $mosaic
-//     """
+    """
+    #trick to find it by publish dir
+    cp trend/mosaik trend/mosaic -r
 
-// }
+    results=`find trend/*.tif`
+    for path in \$results; do
+        mkdir \${path%_$id*}
+        mv \$path \${path%_$id*}/$id".tif"
+    done;
+    force-pyramid $mosaic
+    """
 
-// result.view()
+}
