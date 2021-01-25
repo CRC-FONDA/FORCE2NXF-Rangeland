@@ -1,9 +1,12 @@
 
 sensors_level1 = "LT04,LT05,LE07,S2A"
 sensors_level2 = "LND04 LND05 LND07"
-timeRange = "19900101,20061212"
+timeRange = "19840101,20061231"
 resolution = 30
 useCPU = 2
+
+//Closure to extract the parent directory of a file
+def extractDirectory = { it.parent.toString().substring(it.parent.toString().lastIndexOf('/') + 1 ) }
 
 process downloadAuxiliary{
 
@@ -31,6 +34,9 @@ process downloadData{
     container 'davidfrantz/force'
 
     input:
+    //import the directories seperately to use caching
+    file 'data/*' from Channel.from( file('download/data/*', type: 'dir') ).buffer( size: Integer.MAX_VALUE , remainder: true )
+    //file 'meta' from file('download/meta/')
     file aoi from aoiFile
 
     output:
@@ -40,9 +46,6 @@ process downloadData{
     """
     mkdir meta
     force-level1-csd -u -s $sensors_level1 meta
-
-    mkdir data
-    #touch queue.txt
 
     force-level1-csd -s $sensors_level1 -d $timeRange -c 0,70 meta/ data/ queue.txt $aoi
     """
@@ -55,7 +58,7 @@ process generateTileAllowList{
 
     input:
     file aoi from aoiFile
-    file 'tmp/datacube-definition.prj' from cubeFile    // is there a way to copy the file to this location without specifying the filename?
+    file 'tmp/datacube-definition.prj' from cubeFile
 
     output:
     //Tile allow for this image
@@ -78,27 +81,22 @@ process generateAnalysisMask{
 
     output:
     //Mask for whole region
-    file '**.tif' into masks
+    file 'mask/*/*.tif' into masks
 
     """
     force-cube $aoi mask/ rasterize $resolution
-
-    results=`find mask/*/*.tif`
-    for path in \$results; do
-       mv \$path \${path%/*}_\${path##*/}
-    done;
-
     """
 
 }
 
+//Group masks by tile
+masks = masks.flatten().map{ x -> [ extractDirectory(x), x ] }
+
 process preprocess{
 
-    tag {data.simpleName}
+    tag { data.simpleName }
 
     container 'davidfrantz/force'
-
-    maxForks 6
 
     input:
 
@@ -111,9 +109,9 @@ process preprocess{
 
     output:
     //One BOA image
-    file '**BOA.tif' optional true into boaTiles
+    file 'level2_ard/*/*BOA.tif' optional true into boaTiles
     //One QAI image
-    file '**QAI.tif' optional true into qaiTiles
+    file 'level2_ard/*/*QAI.tif' optional true into qaiTiles
     stdout preprocessLog
 
     """
@@ -153,44 +151,38 @@ process preprocess{
 
     # preprocess
     force-l2ps \$FILEPATH \$PARAM > level2_log/\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
-
-    results=`find level2_ard -name '*.tif'`
-    for path in \$results; do
-       mv \$path \${path%/*}_\${path##*/}
-    done;
-
     """
 
 }
 
 //Group by tile, date and sensor
-boaTiles = boaTiles.flatten().map{ x -> [x.simpleName, x]}.groupTuple()
-qaiTiles = qaiTiles.flatten().map{ x -> [x.simpleName, x]}.groupTuple()
+boaTiles = boaTiles.flatten().map{ x -> [ "${extractDirectory(x)}_${x.simpleName}", x ] }.groupTuple()
+qaiTiles = qaiTiles.flatten().map{ x -> [ "${extractDirectory(x)}_${x.simpleName}", x ] }.groupTuple()
 
 //Copy Stream
-boaTiles.into{boaTilesToMerge ; boaTilesDone}
-qaiTiles.into{qaiTilesToMerge ; qaiTilesDone}
+boaTiles.into{ boaTilesToMerge ; boaTilesDone }
+qaiTiles.into{ qaiTilesToMerge ; qaiTilesDone }
 
 //Find tiles to merge
 boaTilesToMerge = boaTilesToMerge.filter{ x -> x[1].size() > 1 }
 qaiTilesToMerge = qaiTilesToMerge.filter{ x -> x[1].size() > 1 }
 
 //Find tiles with only one file
-boaTilesDone = boaTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
-qaiTilesDone = qaiTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [x[0], x[1][0]]}
+boaTilesDone = boaTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0], x[1][0] ] }
+qaiTilesDone = qaiTilesDone.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0], x[1][0] ] }
 
 process mergeBOA{
 
-    tag {id}
+    tag { id }
 
     container 'davidfrantz/force'
 
     input:
-    tuple val(id), file('tile/tile?.tif') from boaTilesToMerge
+    tuple val( id ), file( 'tile/tile?.tif' ) from boaTilesToMerge
     file cube from cubeFile
 
     output:
-    tuple val(id), file('**.tif') into boaTilesMerged
+    tuple val( id ), file( '**.tif' ) into boaTilesMerged
 
     """
     merge.sh $id $cube $resolution
@@ -200,16 +192,16 @@ process mergeBOA{
 
 process mergeQAI{
 
-    tag {id}
+    tag { id }
 
     container 'davidfrantz/force'
 
     input:
-    tuple val(id), file('tile/tile?.tif') from qaiTilesToMerge
+    tuple val( id ), file( 'tile/tile?.tif' ) from qaiTilesToMerge
     file cube from cubeFile
 
     output:
-    tuple val(id), file('**.tif') into qaiTilesMerged
+    tuple val( id ), file( '**.tif' ) into qaiTilesMerged
 
     """
     merge.sh $id near $resolution
@@ -218,31 +210,24 @@ process mergeQAI{
 }
 
 //Concat merged list with single images, group by tile over time
-boaTilesDoneAndMerged = boaTilesMerged.concat(boaTilesDone).map{ x -> [x[0].substring(0,11), x[1]]}.groupTuple()
-qaiTilesDoneAndMerged = qaiTilesMerged.concat(qaiTilesDone).map{ x -> [x[0].substring(0,11), x[1]]}.groupTuple()
+boaTilesDoneAndMerged = boaTilesMerged.concat(boaTilesDone).map{ x -> [ x[0].substring(0,11), x[1] ] }.groupTuple()
+qaiTilesDoneAndMerged = qaiTilesMerged.concat(qaiTilesDone).map{ x -> [ x[0].substring(0,11), x[1] ] }.groupTuple()
 
 process processHigherLevel{
 
     container 'davidfrantz/force'
-
-    tag {tile}
+    tag { tile }
 
     input:
-    tuple val(tile), file("ard/${tile}/*"), file("ard/${tile}/*"), file("mask/${tile}/aoi.tif") from boaTilesDoneAndMerged.join(qaiTilesDoneAndMerged).join(masks.flatten().map{ x -> [x.simpleName.substring(0,11), x]})
+    tuple val( tile ), file( "ard/${tile}/*" ), file( "ard/${tile}/*" ), file( "mask/${tile}/aoi.tif" ) from boaTilesDoneAndMerged.join( qaiTilesDoneAndMerged ).join( masks )
     file 'ard/datacube-definition.prj' from cubeFile
     file endmember from endmemberFile
 
     output:
-    file 'trend/*.tif' into trendFiles
+    file 'trend/**.tif*' into trendFiles
 
 
     """
-
-    results=`find ard/$tile/*.tif`
-    for path in \$results; do
-       mv \$path ard/$tile/\${path##*$tile"_"}
-    done;
-
     # generate parameterfile from scratch
     force-parameter . TSA 0
     PARAM=trend_"$tile".prm
@@ -299,36 +284,24 @@ process processHigherLevel{
     mkdir trend
     
     force-higher-level \$PARAM
-
-    results=`find trend -name '*.tif'`
-    for path in \$results; do
-       mv \$path \${path%/*}_\${path##*/}
-    done;
     """
 
 }
 
-trendFiles = trendFiles.flatten().map{ x -> [x.simpleName.substring(12), x]}.groupTuple()
-
-trendFiles.into{ trendFiles1; trendFiles2 }
+trendFiles = trendFiles.flatten().map{ x -> [ extractDirectory(x), x ] }.groupTuple()
 
 process processMosaic{
 
-    tag {id}
+    tag { tile }
     container 'davidfrantz/force'
 
     input:
-    tuple val('id'), file('trend/*') from trendFiles1
+    tuple val( tile ), file( "trend/$tile/*" ) from trendFiles
     file 'trend/datacube-definition.prj' from cubeFile
     output:
-    tuple val(id), file('trend/mosaic/*.vrt') into mosaics
+    tuple val( tile ), file( 'trend/*' ) into trendFiles2
 
     """
-    results=`find trend/*.tif`
-    for path in \$results; do
-        mkdir \${path%_$id*}
-        mv \$path \${path%_$id*}/$id".tif"
-    done;
     force-mosaic trend/
     """
 
@@ -336,27 +309,22 @@ process processMosaic{
 
 process processPyramid{
 
-    tag {id}
+    tag { tile }
     publishDir "trend", mode:'copy'
     container 'davidfrantz/force'
 
     input:
-    tuple val('id'), file('trend/*'), file(mosaic: 'trend/mosaik/*') from trendFiles2.join(mosaics)
+    tuple val( tile ), file( 'trend/*' ) from trendFiles2
     file 'trend/datacube-definition.prj' from cubeFile
     
     output:
-    file('**') into trends
+    file( '**' ) into trends
 
     """
     #trick to find it by publish dir
-    cp trend/mosaik trend/mosaic -r
+    touch trend
 
-    results=`find trend/*.tif`
-    for path in \$results; do
-        mkdir \${path%_$id*}
-        mv \$path \${path%_$id*}/$id".tif"
-    done;
-    force-pyramid $mosaic
+    force-pyramid trend/mosaic/*
     """
 
 }
