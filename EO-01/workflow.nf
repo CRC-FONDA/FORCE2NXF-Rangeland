@@ -204,7 +204,7 @@ process mergeQAI{
     tuple val( id ), file( '**.tif' ) into qaiTilesMerged
 
     """
-    merge.sh $id near $resolution
+    merge.sh $id $cube $resolution
     """
 
 }
@@ -224,7 +224,7 @@ process processHigherLevel{
     file endmember from endmemberFile
 
     output:
-    file 'trend/**.tif*' into trendFiles
+    file 'trend/*.tif*' into trendFiles
 
 
     """
@@ -284,24 +284,37 @@ process processHigherLevel{
     mkdir trend
     
     force-higher-level \$PARAM
+
+    #Rename files: /trend/<Tile>/<Filename> to <Tile>_<Filename>, otherwise we can not reextract the tile name later
+    results=`find trend -name '*.tif*'`
+    for path in \$results; do
+       mv \$path \${path%/*}_\${path##*/}
+    done;
     """
 
 }
 
-trendFiles = trendFiles.flatten().map{ x -> [ extractDirectory(x), x ] }.groupTuple()
+trendFiles = trendFiles.flatten().map{ x -> [ x.simpleName.substring(12), x ] }.groupTuple()
 
 process processMosaic{
 
-    tag { tile }
+    tag { product }
     container 'davidfrantz/force'
 
     input:
-    tuple val( tile ), file( "trend/$tile/*" ) from trendFiles
+    tuple val( product ), file('trend/*') from trendFiles
     file 'trend/datacube-definition.prj' from cubeFile
     output:
-    tuple val( tile ), file( 'trend/*' ) into trendFiles2
+    tuple val( product ), file( 'trend/*' ) into trendFiles2
 
     """
+    #Move files from trend/<Tile>_<Filename> to trend/<Tile>/<Filename>
+    results=`find trend/*.tif*`
+    for path in \$results; do
+        mkdir -p \${path%_$product*}
+        mv \$path \${path%_$product*}/${product}.\${path#*.}
+    done;
+
     force-mosaic trend/
     """
 
@@ -309,12 +322,12 @@ process processMosaic{
 
 process processPyramid{
 
-    tag { tile }
+    tag { product }
     publishDir "trend", mode:'copy'
     container 'davidfrantz/force'
 
     input:
-    tuple val( tile ), file( 'trend/*' ) from trendFiles2
+    tuple val( product ), file( 'trend/*' ) from trendFiles2
     file 'trend/datacube-definition.prj' from cubeFile
     
     output:
