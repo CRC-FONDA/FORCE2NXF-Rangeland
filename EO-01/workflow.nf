@@ -22,13 +22,28 @@ process downloadAuxiliary{
     file 'input/grid/datacube-definition.prj' into cubeFile
     file 'input/vector/aoi.gpkg' into aoiFile
     file 'input/dem/' into demFiles
-    file 'input/wvdb/' into wvdbFiles
     file 'input/endmember/hostert-2003.txt' into endmemberFile
 
     """
     wget -O auxiliary.tar.gz https://box.hu-berlin.de/f/eb61444bd97f4c738038/?dl=1
     tar -xzf auxiliary.tar.gz
     mv EO-01/input/ input/
+    """
+
+}
+
+process downloadWaterVapor{
+
+    //Has to be downloaded anyways, so we can use it only for wget
+    container 'davidfrantz/force'
+
+    output:
+    file 'wvdb/' into wvdbFiles
+
+    """
+    wget -O wvp-global.tar.gz https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1
+    mkdir wvdb
+    tar -xzf wvp-global.tar.gz --directory wvdb/
     """
 
 }
