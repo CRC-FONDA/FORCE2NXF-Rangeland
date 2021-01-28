@@ -1,7 +1,11 @@
 
 sensors_level1 = "LT04,LT05,LE07,S2A"
 sensors_level2 = "LND04 LND05 LND07"
-timeRange = "19840101,20061231"
+
+startdate = "1984-01-01"
+enddate = "2006-12-31"
+timeRange = "${startdate.replace('-', '')},${enddate.replace('-', '')}"
+
 resolution = 30
 useCPU = 2
 
@@ -261,9 +265,7 @@ process processHigherLevel{
     sed -i "/^SENSORS /c\\SENSORS = $sensors_level2" \$PARAM
 
     # date range
-    T0=\$(echo $timeRange | cut -d ',' -f 1 | cut -c 1-4)
-    T1=\$(echo $timeRange | cut -d ',' -f 2 | cut -c 1-4)
-    sed -i "/^DATE_RANGE /c\\DATE_RANGE = \$T0-01-01 \$T1-01-01" \$PARAM
+    sed -i "/^DATE_RANGE /c\\DATE_RANGE = $startdate $enddate" \$PARAM
 
     # spectral index
     sed -i "/^INDEX /c\\INDEX = SMA" \$PARAM
