@@ -1,4 +1,10 @@
 
+//If the data should be downloaded
+params.downloadData = false
+
+//Download automatically, if not yet done
+Channel.of(file('download/data/*/*', type: 'dir')).flatten().ifEmpty{ params.downloadData = true }
+
 sensors_level1 = "LT04,LT05,LE07,S2A"
 sensors_level2 = "LND04 LND05 LND07"
 
@@ -52,10 +58,13 @@ process downloadData{
 
     container 'davidfrantz/force'
 
+    when:
+    params.downloadData
+
     input:
-    //import the directories seperately to use caching
-    file 'data/*' from Channel.from( file('download/data/*', type: 'dir') ).buffer( size: Integer.MAX_VALUE , remainder: true )
-    //file 'meta' from file('download/meta/')
+    //import the data
+    file data from Channel.from( file('download/data/', type: 'dir') )
+    file meta from Channel.from( file('download/meta/', type: 'dir') )
     file aoi from aoiFile
 
     output:
@@ -63,13 +72,19 @@ process downloadData{
     file 'data/*/*' into data
 
     """
-    mkdir meta
-    force-level1-csd -u -s $sensors_level1 meta
-
+    #check if meta data was just downloaded
+    if [ ! -f "meta/metadata_landsat.csv" ] || [ ! -f "meta/metadata_sentinel2.csv" ]; then
+        echo "Download meta data."
+        force-level1-csd -u -s $sensors_level1 meta
+    fi
     force-level1-csd -s $sensors_level1 -d $timeRange -c 0,70 meta/ data/ queue.txt $aoi
     """
 
 }
+
+data = data.mix ( Channel.of(file('download/data/*/*', type: 'dir') ) .flatten() ). unique { it.simpleName }
+
+
 
 process generateTileAllowList{
 
@@ -116,6 +131,12 @@ process preprocess{
     tag { data.simpleName }
 
     container 'davidfrantz/force'
+
+    errorStrategy 'retry'
+    maxRetries 5
+
+    cpus useCPU
+    memory '4 GB'
 
     input:
 
@@ -204,7 +225,7 @@ process mergeBOA{
     tuple val( id ), file( '**.tif' ) into boaTilesMerged
 
     """
-    merge.sh $id $cube $resolution
+    merge.sh ${id.substring(12)} $cube $resolution
     """
 
 }
@@ -223,7 +244,7 @@ process mergeQAI{
     tuple val( id ), file( '**.tif' ) into qaiTilesMerged
 
     """
-    merge.sh $id $cube $resolution
+    merge.sh ${id.substring(12)} $cube $resolution
     """
 
 }
@@ -236,6 +257,12 @@ process processHigherLevel{
 
     container 'davidfrantz/force'
     tag { tile }
+    
+    errorStrategy 'retry'
+    maxRetries 5
+
+    cpus useCPU
+    memory '4500 MB'
 
     input:
     tuple val( tile ), file( "ard/${tile}/*" ), file( "ard/${tile}/*" ), file( "mask/${tile}/aoi.tif" ) from boaTilesDoneAndMerged.join( qaiTilesDoneAndMerged ).join( masks )
@@ -246,7 +273,7 @@ process processHigherLevel{
     file 'trend/*.tif*' into trendFiles
 
 
-    """
+    """   
     # generate parameterfile from scratch
     force-parameter . TSA 0
     PARAM=trend_"$tile".prm
