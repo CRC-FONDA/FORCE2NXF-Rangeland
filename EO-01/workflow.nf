@@ -18,6 +18,13 @@ useCPU = 2
 //Closure to extract the parent directory of a file
 def extractDirectory = { it.parent.toString().substring(it.parent.toString().lastIndexOf('/') + 1 ) }
 
+def inRegion = input -> {
+    Integer date = input.simpleName.split("_")[3] as Integer
+    Integer start = startdate.replace('-','') as Integer
+    Integer end = enddate.replace('-','') as Integer
+    return date >= start && date <= end
+}
+
 process downloadAuxiliary{
 
     //Has to be downloaded anyways, so we can use it only for wget
@@ -84,8 +91,6 @@ process downloadData{
 
 data = data.mix ( Channel.of(file('download/data/*/*', type: 'dir') ) .flatten() ). unique { it.simpleName }
 
-
-
 process generateTileAllowList{
 
     container 'davidfrantz/force'
@@ -141,7 +146,7 @@ process preprocess{
     input:
 
     //only process one directory at once
-    file data from data.flatten()
+    file data from data.flatten().filter{ inRegion(it) }
     file cube from cubeFile
     file tile from tileAllow
     file dem  from demFiles
@@ -152,7 +157,6 @@ process preprocess{
     file 'level2_ard/*/*BOA.tif' optional true into boaTiles
     //One QAI image
     file 'level2_ard/*/*QAI.tif' optional true into qaiTiles
-    stdout preprocessLog
 
     """
     FILEPATH=$data
@@ -215,17 +219,38 @@ process mergeBOA{
 
     tag { id }
 
-    container 'davidfrantz/force'
+    container 'rocker/geospatial'
 
     input:
     tuple val( id ), file( 'tile/tile?.tif' ) from boaTilesToMerge
     file cube from cubeFile
 
     output:
-    tuple val( id ), file( '**.tif' ) into boaTilesMerged
+    tuple val( id ), file( "${id.substring(12)}.tif" ), file( "tile/tile1.tif" ) into boaTilesMergedNoMeta
 
     """
-    merge.sh ${id.substring(12)} $cube $resolution
+    merge-boa.r ${id.substring(12)}.tif tile/tile*.tif
+    """
+
+}
+
+process applyMetaBOA{
+
+    tag { id }
+
+    container 'davidfrantz/force'
+
+    input:
+    tuple val( id ), file( dst ), file( src ) from boaTilesMergedNoMeta
+
+    output:
+    tuple val( id ), file( "${dst}" ) into boaTilesMerged
+
+    """
+    #To use resume
+    mv ${dst} ${dst}_tmp
+    cp ${dst}_tmp ${dst}
+    force-mdcp $src ${dst}
     """
 
 }
@@ -234,17 +259,38 @@ process mergeQAI{
 
     tag { id }
 
-    container 'davidfrantz/force'
+    container 'rocker/geospatial'
 
     input:
     tuple val( id ), file( 'tile/tile?.tif' ) from qaiTilesToMerge
     file cube from cubeFile
 
     output:
-    tuple val( id ), file( '**.tif' ) into qaiTilesMerged
+    tuple val( id ), file( "${id.substring(12)}.tif" ), file( "tile/tile1.tif" ) into qaiTilesMergedNoMeta
 
     """
-    merge.sh ${id.substring(12)} $cube $resolution
+    merge-qai.r ${id.substring(12)}.tif tile/tile*.tif
+    """
+
+}
+
+process applyMetaQAI{
+
+    tag { id }
+
+    container 'davidfrantz/force'
+
+    input:
+    tuple val( id ), file( dst ), file( src ) from qaiTilesMergedNoMeta
+
+    output:
+    tuple val( id ), file( "${dst}" ) into qaiTilesMerged
+
+    """
+    #To use resume
+    mv ${dst} ${dst}_tmp
+    cp ${dst}_tmp ${dst}
+    force-mdcp $src ${dst}
     """
 
 }
@@ -273,7 +319,7 @@ process processHigherLevel{
     file 'trend/*.tif*' into trendFiles
 
 
-    """   
+    """  
     # generate parameterfile from scratch
     force-parameter . TSA 0
     PARAM=trend_"$tile".prm
@@ -358,11 +404,13 @@ process processMosaic{
         mkdir -p \${path%_$product*}
         mv \$path \${path%_$product*}/${product}.\${path#*.}
     done;
-
+    
     force-mosaic trend/
     """
 
 }
+
+trendFiles2.into{ trendFilesPyramids; trendFilesCheck }
 
 process processPyramid{
 
@@ -371,7 +419,7 @@ process processPyramid{
     container 'davidfrantz/force'
 
     input:
-    tuple val( product ), file( 'trend/*' ) from trendFiles2
+    tuple val( product ), file( 'trend/*' ) from trendFilesPyramids
     file 'trend/datacube-definition.prj' from cubeFile
     
     output:
@@ -382,6 +430,26 @@ process processPyramid{
     touch trend
 
     force-pyramid trend/mosaic/*
+    """
+
+}
+
+process checkResults {
+
+    container 'rocker/geospatial'
+
+    input:
+    file{ "trend/?/*" } from trendFilesCheck.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
+    file( reference ) from file( "reference.RData" )
+ 
+    """
+    files=`find ./trend/ -maxdepth 1 -mindepth 1 -type d`
+    for path in \$files; do
+        mkdir -p trend/\$(ls \$path)
+        cp \$path/*/* trend/\$(ls \$path)/
+        rm \$path -r
+    done;
+    test.R trend/mosaic $reference log.log
     """
 
 }
