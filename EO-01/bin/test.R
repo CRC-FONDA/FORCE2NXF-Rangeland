@@ -7,6 +7,7 @@ if (length(args) != 3) {
   stop("\ngive input directory (mosaic) as 1st arg\ngive reference image (*.RData) as 2nd arg\ngive output file (*.txt) as 3rd arg", call.=FALSE)
 }
 
+dinp <- "/data/Jakku/fonda/reference/mosaic"
 dinp <- args[1]
 fref <- args[2]
 fout <- args[3]
@@ -19,7 +20,7 @@ res      <- 30
 area_m2  <- res*res
 area_km2 <- area_m2/1e6
 
-tol      <- 2.5
+tol      <- 10
 
 
 # LOAD REFERENCE
