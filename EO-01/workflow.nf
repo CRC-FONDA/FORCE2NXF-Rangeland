@@ -1,3 +1,5 @@
+//RUN:
+//nextflow run workflow.nf -with-docker ubuntu -resume -with-report report.html -bg > log.log
 
 //If the data should be downloaded
 params.downloadData = false
@@ -14,6 +16,8 @@ timeRange = "${startdate.replace('-', '')},${enddate.replace('-', '')}"
 
 resolution = 30
 useCPU = 2
+
+onlyTile = null
 
 //Closure to extract the parent directory of a file
 def extractDirectory = { it.parent.toString().substring(it.parent.toString().lastIndexOf('/') + 1 ) }
@@ -34,7 +38,6 @@ process downloadAuxiliary{
     file 'input/' into auxiliaryFiles
     file 'input/grid/datacube-definition.prj' into cubeFile
     file 'input/vector/aoi.gpkg' into aoiFile
-    file 'input/dem/' into demFiles
     file 'input/endmember/hostert-2003.txt' into endmemberFile
 
     """
@@ -137,6 +140,9 @@ process preprocess{
 
     container 'davidfrantz/force'
 
+    publishDir 'preprocess_logs', mode: 'copy', pattern: '**.log'
+    publishDir 'preprocess_prm', mode: 'copy', pattern: '**.prm'
+
     errorStrategy 'retry'
     maxRetries 5
 
@@ -149,7 +155,7 @@ process preprocess{
     file data from data.flatten().filter{ inRegion(it) }
     file cube from cubeFile
     file tile from tileAllow
-    file dem  from demFiles
+    file dem  from file('dem/')
     file wvdb from wvdbFiles
 
     output:
@@ -157,6 +163,9 @@ process preprocess{
     file 'level2_ard/*/*BOA.tif' optional true into boaTiles
     //One QAI image
     file 'level2_ard/*/*QAI.tif' optional true into qaiTiles
+    //Logs
+    file 'level2_log/*.log'
+    file '*.prm'
 
     """
     FILEPATH=$data
@@ -183,7 +192,7 @@ process preprocess{
     sed -i "/^DIR_LEVEL2 /c\\DIR_LEVEL2 = level2_ard/" \$PARAM
     sed -i "/^DIR_LOG /c\\DIR_LOG = level2_log/" \$PARAM
     sed -i "/^DIR_TEMP /c\\DIR_TEMP = level2_tmp/" \$PARAM
-    sed -i "/^FILE_DEM /c\\FILE_DEM = $dem/dem.vrt" \$PARAM
+    sed -i "/^FILE_DEM /c\\FILE_DEM = $dem/global_srtm-aster.vrt" \$PARAM
     sed -i "/^DIR_WVPLUT /c\\DIR_WVPLUT = $wvdb" \$PARAM
     sed -i "/^FILE_TILE /c\\FILE_TILE = $tile" \$PARAM
     sed -i "/^TILE_SIZE /c\\TILE_SIZE = \$TILESIZE" \$PARAM
@@ -191,7 +200,7 @@ process preprocess{
     sed -i "/^ORIGIN_LON /c\\ORIGIN_LON = \$ORIGINX" \$PARAM
     sed -i "/^ORIGIN_LAT /c\\ORIGIN_LAT = \$ORIGINY" \$PARAM
     sed -i "/^PROJECTION /c\\PROJECTION = \$CRS" \$PARAM
-    sed -i "/^NTHREAD /c\\NTHREAD = $useCPU/" \$PARAM
+    sed -i "/^NTHREAD /c\\NTHREAD = $useCPU" \$PARAM
 
     # preprocess
     force-l2ps \$FILEPATH \$PARAM > level2_log/\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)
@@ -308,10 +317,10 @@ process processHigherLevel{
     maxRetries 5
 
     cpus useCPU
-    memory '4500 MB'
+    memory '6500 MB'
 
     input:
-    tuple val( tile ), file( "ard/${tile}/*" ), file( "ard/${tile}/*" ), file( "mask/${tile}/aoi.tif" ) from boaTilesDoneAndMerged.join( qaiTilesDoneAndMerged ).join( masks )
+    tuple val( tile ), file( "ard/${tile}/*" ), file( "ard/${tile}/*" ), file( "mask/${tile}/aoi.tif" ) from boaTilesDoneAndMerged.join( qaiTilesDoneAndMerged ).join( masks ).filter { onlyTile ? it[0] == onlyTile : true }
     file 'ard/datacube-definition.prj' from cubeFile
     file endmember from endmemberFile
 
@@ -356,7 +365,8 @@ process processHigherLevel{
     sed -i "/^DATE_RANGE /c\\DATE_RANGE = $startdate $enddate" \$PARAM
 
     # spectral index
-    sed -i "/^INDEX /c\\INDEX = SMA" \$PARAM
+    sed -i "/^INDEX /c\\INDEX = SMA${onlyTile ? ' NDVI BLUE GREEN RED NIR SWIR1 SWIR2' : ''}" \$PARAM
+    ${ onlyTile ? 'sed -i "/^OUTPUT_TSS /c\\OUTPUT_TSS = TRUE" \$PARAM' : ''}
     
     # interpolation
     sed -i "/^INT_DAY /c\\INT_DAY = 8" \$PARAM
@@ -384,18 +394,21 @@ process processHigherLevel{
 
 }
 
-trendFiles = trendFiles.flatten().map{ x -> [ x.simpleName.substring(12), x ] }.groupTuple()
+trendFiles.flatten().map{ x -> [ x.simpleName.substring(12), x ] }.into { trendFilesMosaic ; trendFilesPyramid }
+
+trendFilesMosaic = trendFilesMosaic.groupTuple()
 
 process processMosaic{
 
     tag { product }
     container 'davidfrantz/force'
+    publishDir "trendMosaic/$product", mode:'copy'
 
     input:
-    tuple val( product ), file('trend/*') from trendFiles
+    tuple val( product ), file('trend/*') from trendFilesMosaic
     file 'trend/datacube-definition.prj' from cubeFile
     output:
-    tuple val( product ), file( 'trend/*' ) into trendFiles2
+    tuple val( product ), file( 'trend/*' ) into trendFilesCheck
 
     """
     #Move files from trend/<Tile>_<Filename> to trend/<Tile>/<Filename>
@@ -410,26 +423,21 @@ process processMosaic{
 
 }
 
-trendFiles2.into{ trendFilesPyramids; trendFilesCheck }
-
 process processPyramid{
 
     tag { product }
-    publishDir "trend", mode:'copy'
+    publishDir "trend/$product/", mode:'copy'
     container 'davidfrantz/force'
+    memory '1000 MB'
 
     input:
-    tuple val( product ), file( 'trend/*' ) from trendFilesPyramids
-    file 'trend/datacube-definition.prj' from cubeFile
+    tuple val( product ), file( image ) from trendFilesPyramid.filter { it[1].name.endsWith('.tif')  }
     
     output:
-    file( '**' ) into trends
+    file( '**' ) optional true into trends
 
     """
-    #trick to find it by publish dir
-    touch trend
-
-    force-pyramid trend/mosaic/*
+    force-pyramid $image
     """
 
 }
