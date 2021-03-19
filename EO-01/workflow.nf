@@ -1,11 +1,7 @@
 //RUN:
-//nextflow run workflow.nf -with-docker ubuntu -resume -with-report report.html -bg > log.log
+//nextflow run workflow.nf -with-docker ubuntu -resume -with-report report.html -with-dag flowchart.html -bg > log.log
 
-//If the data should be downloaded
-params.downloadData = false
-
-//Download automatically, if not yet done
-Channel.of(file('download/data/*/*', type: 'dir')).flatten().ifEmpty{ params.downloadData = true }
+data = Channel.of(file('download/data/*/*', type: 'dir') ) .flatten()
 
 sensors_level1 = "LT04,LT05,LE07,S2A"
 sensors_level2 = "LND04 LND05 LND07"
@@ -35,7 +31,6 @@ process downloadAuxiliary{
     container 'davidfrantz/force'
 
     output:
-    file 'input/' into auxiliaryFiles
     file 'input/grid/datacube-definition.prj' into cubeFile
     file 'input/vector/aoi.gpkg' into aoiFile
     file 'input/endmember/hostert-2003.txt' into endmemberFile
@@ -63,36 +58,6 @@ process downloadWaterVapor{
     """
 
 }
-
-process downloadData{
-
-    container 'davidfrantz/force'
-
-    when:
-    params.downloadData
-
-    input:
-    //import the data
-    file data from Channel.from( file('download/data/', type: 'dir') )
-    file meta from Channel.from( file('download/meta/', type: 'dir') )
-    file aoi from aoiFile
-
-    output:
-    //Folders with data of one single image
-    file 'data/*/*' into data
-
-    """
-    #check if meta data was just downloaded
-    if [ ! -f "meta/metadata_landsat.csv" ] || [ ! -f "meta/metadata_sentinel2.csv" ]; then
-        echo "Download meta data."
-        force-level1-csd -u -s $sensors_level1 meta
-    fi
-    force-level1-csd -s $sensors_level1 -d $timeRange -c 0,70 meta/ data/ queue.txt $aoi
-    """
-
-}
-
-data = data.mix ( Channel.of(file('download/data/*/*', type: 'dir') ) .flatten() ). unique { it.simpleName }
 
 process generateTileAllowList{
 
@@ -402,7 +367,7 @@ process processMosaic{
 
     tag { product }
     container 'davidfrantz/force'
-    publishDir "trendMosaic/$product", mode:'copy'
+    publishDir "trend/mosaic/$product", mode:'copy'
 
     input:
     tuple val( product ), file('trend/*') from trendFilesMosaic
@@ -426,15 +391,16 @@ process processMosaic{
 process processPyramid{
 
     tag { product }
-    publishDir "trend/$product/", mode:'copy'
+    publishDir "trend/pyramid/$product/trend/${image.simpleName.substring(0,11)}/", mode:'copy'
     container 'davidfrantz/force'
-    memory '1000 MB'
+    memory '3000 MB'
+    stageInMode 'copy'
 
     input:
     tuple val( product ), file( image ) from trendFilesPyramid.filter { it[1].name.endsWith('.tif')  }
     
     output:
-    file( '**' ) optional true into trends
+    file( '**' ) into trends
 
     """
     force-pyramid $image
@@ -448,7 +414,7 @@ process checkResults {
 
     input:
     file{ "trend/?/*" } from trendFilesCheck.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
-    file( reference ) from file( "reference.RData" )
+    file( reference ) from file( "test/reference.RData" )
  
     """
     files=`find ./trend/ -maxdepth 1 -mindepth 1 -type d`
