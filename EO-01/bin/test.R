@@ -20,7 +20,7 @@ res      <- 30
 area_m2  <- res*res
 area_km2 <- area_m2/1e6
 
-tol      <- 10
+tol      <- 0.5
 
 
 # LOAD REFERENCE
