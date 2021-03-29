@@ -1,5 +1,5 @@
 //RUN:
-//nextflow run workflow.nf -with-docker ubuntu -resume -with-report report.html -with-dag flowchart.html -bg > log.log
+//nextflow run workflow.nf -with-report report.html -with-dag flowchart.html -bg > log.log
 
 data = Channel.of(file('download/data/*/*', type: 'dir') ) .flatten()
 
@@ -282,7 +282,7 @@ process processHigherLevel{
     maxRetries 5
 
     cpus useCPU
-    memory '6500 MB'
+    memory { onlyTile ? '6500 MB' : '3500 MB' }
 
     input:
     tuple val( tile ), file( "ard/${tile}/*" ), file( "ard/${tile}/*" ), file( "mask/${tile}/aoi.tif" ) from boaTilesDoneAndMerged.join( qaiTilesDoneAndMerged ).join( masks ).filter { onlyTile ? it[0] == onlyTile : true }
@@ -393,7 +393,7 @@ process processPyramid{
     tag { product }
     publishDir "trend/pyramid/$product/trend/${image.simpleName.substring(0,11)}/", mode:'copy'
     container 'davidfrantz/force'
-    memory '3000 MB'
+    memory '4000 MB'
     stageInMode 'copy'
 
     input:
