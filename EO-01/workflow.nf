@@ -1,7 +1,8 @@
 //RUN:
 //nextflow run workflow.nf -with-report report.html -with-dag flowchart.html -bg > log.log
-
-data = Channel.of(file('download/data/*/*', type: 'dir') ) .flatten()
+params.inputdata = ""
+println("input: $params.inputdata")
+data = Channel.of(file( params.inputdata + 'download/data/*/*', type: 'dir') ) .flatten()
 
 sensors_level1 = "LT04,LT05,LE07,S2A"
 sensors_level2 = "LND04 LND05 LND07"
@@ -120,7 +121,7 @@ process preprocess{
     file data from data.flatten().filter{ inRegion(it) }
     file cube from cubeFile
     file tile from tileAllow
-    file dem  from file('dem/')
+    file dem  from file( params.inputdata + 'dem/')
     file wvdb from wvdbFiles
 
     output:
