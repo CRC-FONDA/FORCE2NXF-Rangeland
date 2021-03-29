@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: default
+  name: ceph-pod
+spec:
+  containers:
+  - name: ceph
+    image: ubuntu
+    command:
+      - /bin/bash
+      - "-c"
+      - "sleep 60m"
+    volumeMounts:
+      - mountPath: /data
+        name: data
+      - mountPath: /workdir
+        name: workdir
+  volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: fonda-datasets
+  - name: workdir
+    persistentVolumeClaim:
+      claimName: ceph-fs-volume
+
