@@ -44,22 +44,6 @@ process downloadAuxiliary{
 
 }
 
-process downloadWaterVapor{
-
-    //Has to be downloaded anyways, so we can use it only for wget
-    container 'davidfrantz/force'
-
-    output:
-    file 'wvdb/' into wvdbFiles
-
-    """
-    wget -O wvp-global.tar.gz https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1
-    mkdir wvdb
-    tar -xzf wvp-global.tar.gz --directory wvdb/
-    """
-
-}
-
 process generateTileAllowList{
 
     container 'davidfrantz/force'
@@ -122,7 +106,8 @@ process preprocess{
     file cube from cubeFile
     file tile from tileAllow
     file dem  from file( params.inputdata + 'dem/')
-    file wvdb from wvdbFiles
+    //data from https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1
+    file wvdb from file( params.inputdata + 'wvdb/')
 
     output:
     //One BOA image
