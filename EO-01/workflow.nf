@@ -97,7 +97,7 @@ process preprocess{
     maxRetries 5
 
     cpus useCPU
-    memory '4 GB'
+    memory '5 GB'
 
     input:
 
