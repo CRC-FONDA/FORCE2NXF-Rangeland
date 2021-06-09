@@ -14,7 +14,7 @@ params.outdata = ""
 params.useCPU = 2
 params.resolution = 30
 //Number of images to merge in one process
-params.groupSize = 6
+params.groupSize = 100
 
 workflow preprocessing {
 
