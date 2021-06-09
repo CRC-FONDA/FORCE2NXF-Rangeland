@@ -36,15 +36,13 @@ workflow preprocessing {
         preprocess( data, cubeFile, generateTileAllowList.out.tileAllow, dem, wvdb )
 
         //Group by tile, date and sensor
-        boaTiles = preprocess.out.boaTiles.flatten().map{ x -> [ "${extractDirectory(x)}_${x.simpleName}", x ] }.groupTuple()
-        qaiTiles = preprocess.out.qaiTiles.flatten().map{ x -> [ "${extractDirectory(x)}_${x.simpleName}", x ] }.groupTuple()
+        boaTiles = preprocess.out.boaTiles.flatten().map{ x -> [ extractDirectory(x), x ] }.groupTuple()
+        qaiTiles = preprocess.out.qaiTiles.flatten().map{ x -> [ extractDirectory(x), x ] }.groupTuple()
 
         //Find tiles to merge
         boaTilesToMerge = boaTiles.filter{ x -> x[1].size() > 1 }
-                                .map { [ it[0] .substring(0,11), it[1] ] }
                                 .groupTuple( remainder : true, size : params.groupSize ).map{ [ it[0], it[1] .flatten() ] }
         qaiTilesToMerge = qaiTiles.filter{ x -> x[1].size() > 1 }
-                                .map { [ it[0] .substring(0,11), it[1] ] }
                                 .groupTuple( remainder : true, size : params.groupSize ).map{ [ it[0], it[1] .flatten() ] }
 
         //Find tiles with only one file
@@ -56,10 +54,10 @@ workflow preprocessing {
 
         //Concat merged list with single images, group by tile over time
         boaTiles = mergeBOA.out.tilesMerged
-                        .concat( boaTilesDone ).map{ x -> [ x[0].substring(0,11), x[1] ] }.groupTuple()
+                        .concat( boaTilesDone ).groupTuple()
                         .map { [it[0], it[1].flatten() ] }
         qaiTiles = mergeQAI.out.tilesMerged
-                        .concat( qaiTilesDone ).map{ x -> [ x[0].substring(0,11), x[1] ] }.groupTuple()
+                        .concat( qaiTilesDone ).groupTuple()
                         .map { [it[0], it[1].flatten() ] }
     
     emit:
