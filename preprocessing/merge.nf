@@ -12,7 +12,7 @@ process merge {
     path cube
 
     output:
-    tuple val( id ), path( "*.tif" ) emit: tilesMergedNoMeta
+    tuple val( id ), path( "*.tif" ), emit: tilesMerged
 
     """
 
@@ -30,7 +30,7 @@ process merge {
         force-mdcp \$onefile \$file
 
     done
-        
+
     """
 
 }
