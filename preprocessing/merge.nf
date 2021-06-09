@@ -4,18 +4,33 @@ process merge {
 
     tag { id }
 
-    container 'rocker/geospatial'
+    container 'davidfrantz/force:dev'
 
     input:
     path ("merge.r")
-    tuple val( id ), path( 'tile/tile?.tif' )
+    tuple val( id ), path( 'input/?/*' )
     path cube
 
     output:
-    tuple val( id ), path( "${id.substring(12)}.tif" ), path( "tile/tile1.tif" ), emit: tilesMergedNoMeta
+    tuple val( id ), path( "*.tif" ) emit: tilesMergedNoMeta
 
     """
-    ./merge.r ${id.substring(12)}.tif tile/tile*.tif
+
+    files=`find -L input/ -type f -printf "%f\\n" | sort | uniq`
+
+    for file in \$files
+    do
+        ls -- */*/\${file}
+        onefile=`ls -- */*/\${file} | head -1`
+        
+        #merge together
+        ./merge.r \$file ls -- */*/\${file}
+
+        #apply meta
+        force-mdcp \$onefile \$file
+
+    done
+        
     """
 
 }

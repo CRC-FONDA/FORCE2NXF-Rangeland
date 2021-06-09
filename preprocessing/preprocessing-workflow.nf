@@ -13,6 +13,8 @@ def extractDirectory = { it.parent.toString().substring(it.parent.toString().las
 params.outdata = ""
 params.useCPU = 2
 params.resolution = 30
+//Number of images to merge in one process
+params.groupSize = 6
 
 workflow preprocessing {
 
@@ -39,18 +41,26 @@ workflow preprocessing {
 
         //Find tiles to merge
         boaTilesToMerge = boaTiles.filter{ x -> x[1].size() > 1 }
+                                .map { [ it[0] .substring(0,11), it[1] ] }
+                                .groupTuple( remainder : true, size : params.groupSize ).map{ [ it[0], it[1] .flatten() ] }
         qaiTilesToMerge = qaiTiles.filter{ x -> x[1].size() > 1 }
+                                .map { [ it[0] .substring(0,11), it[1] ] }
+                                .groupTuple( remainder : true, size : params.groupSize ).map{ [ it[0], it[1] .flatten() ] }
 
         //Find tiles with only one file
         boaTilesDone = boaTiles.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0], x[1][0] ] }
         qaiTilesDone = qaiTiles.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0], x[1][0] ] }
 
-        applyMetaBOA( mergeBOA( file("${moduleDir}/bin/merge-boa.r"), boaTilesToMerge, cubeFile ) )
-        applyMetaQAI( mergeQAI( file("${moduleDir}/bin/merge-qai.r"), qaiTilesToMerge, cubeFile ) )
+        mergeBOA( file("${moduleDir}/bin/merge-boa.r"), boaTilesToMerge, cubeFile )
+        mergeQAI( file("${moduleDir}/bin/merge-qai.r"), qaiTilesToMerge, cubeFile )
 
         //Concat merged list with single images, group by tile over time
-        boaTiles = applyMetaBOA.out.tilesMerged.concat( boaTilesDone ).map{ x -> [ x[0].substring(0,11), x[1] ] }.groupTuple()
-        qaiTiles = applyMetaQAI.out.tilesMerged.concat( qaiTilesDone ).map{ x -> [ x[0].substring(0,11), x[1] ] }.groupTuple()
+        boaTiles = mergeBOA.out.tilesMerged
+                        .concat( boaTilesDone ).map{ x -> [ x[0].substring(0,11), x[1] ] }.groupTuple()
+                        .map { [it[0], it[1].flatten() ] }
+        qaiTiles = mergeQAI.out.tilesMerged
+                        .concat( qaiTilesDone ).map{ x -> [ x[0].substring(0,11), x[1] ] }.groupTuple()
+                        .map { [it[0], it[1].flatten() ] }
     
     emit:
         tilesAndMasks = boaTiles.join( qaiTiles ).join( masks )
