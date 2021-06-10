@@ -20,11 +20,12 @@ process merge {
 
     for file in \$files
     do
-        ls -- */*/\${file}
+        
         onefile=`ls -- */*/\${file} | head -1`
         
         #merge together
-        ./merge.r \$file ls -- */*/\${file}
+        matchingFiles=`ls -- */*/\${file}`
+        ./merge.r \$file \${matchingFiles}
 
         #apply meta
         force-mdcp \$onefile \$file
