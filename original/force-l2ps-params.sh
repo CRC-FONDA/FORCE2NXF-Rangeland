@@ -4,6 +4,7 @@
 PARAM=$1
 
 # set parameters
+sed -i "/^FILE_QUEUE /cFILE_QUEUE = queue.txt" $PARAM
 sed -i "/^DIR_LEVEL2 /cDIR_LEVEL2 = ard/" $PARAM
 sed -i "/^DIR_LOG /cDIR_LOG = log/" $PARAM
 sed -i "/^DIR_TEMP /cDIR_TEMP = tmp/" $PARAM
