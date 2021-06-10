@@ -36,8 +36,8 @@ workflow preprocessing {
         preprocess( data, cubeFile, generateTileAllowList.out.tileAllow, dem, wvdb )
 
         //Group by tile, date and sensor
-        boaTiles = preprocess.out.boaTiles.flatten().map{ [ "${extractDirectory(it)}_${x.simpleName}", it ] }.groupTuple()
-        qaiTiles = preprocess.out.qaiTiles.flatten().map{ [ "${extractDirectory(it)}_${x.simpleName}", it ] }.groupTuple()
+        boaTiles = preprocess.out.boaTiles.flatten().map{ [ "${extractDirectory(it)}_${it.simpleName}", it ] }.groupTuple()
+        qaiTiles = preprocess.out.qaiTiles.flatten().map{ [ "${extractDirectory(it)}_${it.simpleName}", it ] }.groupTuple()
 
         //Find tiles to merge
         boaTilesToMerge = boaTiles.filter{ x -> x[1].size() > 1 }
