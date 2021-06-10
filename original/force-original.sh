@@ -2,7 +2,7 @@
 
 # original FORCE workflow
 
-export BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # Docker prep
 WORKDIR=/data/Jakku/fonda/B5-EO-01
