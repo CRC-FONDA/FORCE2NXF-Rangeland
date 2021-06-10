@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# this here is an interim translation of original workflow on the way to the Nextflow workflow
+
 EXPECTED_ARGS=1
 
 if [ $# -ne $EXPECTED_ARGS ]; then
