@@ -36,18 +36,20 @@ workflow preprocessing {
         preprocess( data, cubeFile, generateTileAllowList.out.tileAllow, dem, wvdb )
 
         //Group by tile, date and sensor
-        boaTiles = preprocess.out.boaTiles.flatten().map{ x -> [ extractDirectory(x), x ] }.groupTuple()
-        qaiTiles = preprocess.out.qaiTiles.flatten().map{ x -> [ extractDirectory(x), x ] }.groupTuple()
+        boaTiles = preprocess.out.boaTiles.flatten().map{ [ "${extractDirectory(it)}_${x.simpleName}", it ] }.groupTuple()
+        qaiTiles = preprocess.out.qaiTiles.flatten().map{ [ "${extractDirectory(it)}_${x.simpleName}", it ] }.groupTuple()
 
         //Find tiles to merge
         boaTilesToMerge = boaTiles.filter{ x -> x[1].size() > 1 }
+                                .map{ [ it.substring( 0, 11 ), it[1] ] }
                                 .groupTuple( remainder : true, size : params.groupSize ).map{ [ it[0], it[1] .flatten() ] }
         qaiTilesToMerge = qaiTiles.filter{ x -> x[1].size() > 1 }
+                                .map{ [ it.substring( 0, 11 ), it[1] ] }
                                 .groupTuple( remainder : true, size : params.groupSize ).map{ [ it[0], it[1] .flatten() ] }
 
         //Find tiles with only one file
-        boaTilesDone = boaTiles.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0], x[1][0] ] }
-        qaiTilesDone = qaiTiles.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0], x[1][0] ] }
+        boaTilesDone = boaTiles.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0] .substring( 0, 11 ), x[1][0] ] }
+        qaiTilesDone = qaiTiles.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0] .substring( 0, 11 ), x[1][0] ] }
 
         mergeBOA( file("${moduleDir}/bin/merge-boa.r"), boaTilesToMerge, cubeFile )
         mergeQAI( file("${moduleDir}/bin/merge-qai.r"), qaiTilesToMerge, cubeFile )
