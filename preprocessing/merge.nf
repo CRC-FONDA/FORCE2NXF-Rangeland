@@ -5,6 +5,7 @@ process merge {
     tag { id }
 
     container 'davidfrantz/force:dev'
+    memory '2000 MB'
 
     input:
     path ("merge.r")

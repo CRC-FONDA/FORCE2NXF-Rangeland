@@ -1,10 +1,12 @@
 nextflow.enable.dsl=2
 
 params.resolution = 30
+params.forceVer = "latest"
 
 process generateAnalysisMask{
 
-    container 'davidfrantz/force'
+    container "davidfrantz/force:${params.forceVer}"
+    memory '500 MB'
 
     input:
     path aoi

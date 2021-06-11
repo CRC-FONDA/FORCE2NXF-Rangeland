@@ -6,17 +6,18 @@ params.enddate = "2006-12-31"
 params.resolution = 30
 params.useCPU = 2
 params.onlyTile = null
+params.forceVer = "latest"
 
 process processHigherLevel{
 
-    container 'davidfrantz/force'
+    container "davidfrantz/force:${params.forceVer}"
     tag { tile }
     
     errorStrategy 'retry'
     maxRetries 5
 
     cpus params.useCPU
-    memory { params.onlyTile ? '12000 MB' : '10000 MB' }
+    memory { params.onlyTile ? '12000 MB' : '4000 MB' }
 
     input:
     tuple val( tile ), path( "ard/${tile}/*" ), path( "ard/${tile}/*" ), path( "mask/${tile}/aoi.tif" )

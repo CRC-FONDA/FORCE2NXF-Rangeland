@@ -2,12 +2,13 @@ nextflow.enable.dsl=2
 
 params.outdata = ""
 params.useCPU = 2
+params.forceVer = "latest"
 
 process preprocess {
 
     tag { data.simpleName }
 
-    container 'davidfrantz/force'
+    container "davidfrantz/force:${params.forceVer}"
 
     publishDir "${params.outdata}preprocess_logs", mode: 'copy', pattern: '**.log'
     publishDir "${params.outdata}preprocess_prm", mode: 'copy', pattern: '**.prm'

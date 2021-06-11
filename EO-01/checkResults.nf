@@ -3,6 +3,7 @@ nextflow.enable.dsl=2
 process checkResults {
 
     container 'rocker/geospatial'
+    memory '12000 MB'
 
     input:
     file{ "trend/?/*" }

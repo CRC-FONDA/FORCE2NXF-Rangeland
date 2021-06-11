@@ -3,6 +3,7 @@ nextflow.enable.dsl=2
 process generateTileAllowList{
 
     container 'davidfrantz/force'
+    memory '500 MB'
 
     input:
     path aoi
