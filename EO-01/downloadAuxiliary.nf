@@ -5,7 +5,7 @@ params.forceVer = "latest"
 process downloadAuxiliary{
 
     //Has to be downloaded anyways, so we can use it only for wget
-    "davidfrantz/force:${params.forceVer}"
+    container "davidfrantz/force:${params.forceVer}"
     memory '500 MB'
 
     output:

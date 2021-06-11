@@ -5,7 +5,7 @@ params.forceVer = "latest"
 
 process generateAnalysisMask{
 
-    "davidfrantz/force:${params.forceVer}"
+    container "davidfrantz/force:${params.forceVer}"
     memory '500 MB'
 
     input:
