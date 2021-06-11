@@ -1,11 +1,12 @@
 nextflow.enable.dsl=2
 
 params.outdata = ""
+params.forceVer = "latest"
 
 process processMosaic{
 
     tag { product }
-    container 'davidfrantz/force'
+    container "davidfrantz/force:${params.forceVer}"
     memory '1500 MB'
     publishDir "${params.outdata}trend/mosaic/$product", mode:'copy'
 

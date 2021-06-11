@@ -12,6 +12,7 @@ params.enddate = "2006-12-31"
 params.resolution = 30
 params.useCPU = 2
 params.onlyTile = null
+params.forceVer = "latest"
 
 workflow level2processing {
 

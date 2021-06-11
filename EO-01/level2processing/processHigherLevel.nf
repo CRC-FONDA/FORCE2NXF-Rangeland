@@ -6,10 +6,11 @@ params.enddate = "2006-12-31"
 params.resolution = 30
 params.useCPU = 2
 params.onlyTile = null
+params.forceVer = "latest"
 
 process processHigherLevel{
 
-    container 'davidfrantz/force'
+    container "davidfrantz/force:${params.forceVer}"
     tag { tile }
     
     errorStrategy 'retry'
