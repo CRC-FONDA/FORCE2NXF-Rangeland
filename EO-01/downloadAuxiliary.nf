@@ -4,6 +4,7 @@ process downloadAuxiliary{
 
     //Has to be downloaded anyways, so we can use it only for wget
     container 'davidfrantz/force'
+    memory '500 MB'
 
     output:
     path 'input/grid/datacube-definition.prj', emit: cubeFile

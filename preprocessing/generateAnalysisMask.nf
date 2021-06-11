@@ -5,6 +5,7 @@ params.resolution = 30
 process generateAnalysisMask{
 
     container 'davidfrantz/force'
+    memory '500 MB'
 
     input:
     path aoi
