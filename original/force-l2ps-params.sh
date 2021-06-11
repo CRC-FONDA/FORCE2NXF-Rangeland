@@ -25,7 +25,7 @@ sed -i "/^ORIGIN_LON /cORIGIN_LON = $ORIGINX" $PARAM
 sed -i "/^ORIGIN_LAT /cORIGIN_LAT = $ORIGINY" $PARAM
 sed -i "/^PROJECTION /cPROJECTION = $CRS" $PARAM
 sed -i "/^NPROC /cNPROC = 112" $PARAM
-sed -i "/^NTHREAD /cNTHREAD = 10" $PARAM
+sed -i "/^NTHREAD /cNTHREAD = 1" $PARAM
 sed -i "/^DELAY /cDELAY = 0" $PARAM
 
 exit 0
