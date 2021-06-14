@@ -31,7 +31,7 @@ def inRegion = input -> {
 
 workflow {
 
-    data = Channel.fromPath( "${params.inputdata}download/data/*/*", type: 'dir') .flatten()
+    data = Channel.fromPath( "${params.inputdata}/download/data/*/*", type: 'dir') .flatten()
     data = data.flatten().filter{ inRegion(it) }
     dem = file( params.inputdata + 'dem/')
     wvdb = file( params.inputdata + 'wvdb/')
