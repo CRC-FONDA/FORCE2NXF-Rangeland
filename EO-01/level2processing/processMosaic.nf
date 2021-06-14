@@ -8,7 +8,7 @@ process processMosaic{
     tag { product }
     container "davidfrantz/force:${params.forceVer}"
     memory '1500 MB'
-    publishDir "${params.outdata}trend/mosaic/$product", mode:'copy'
+    publishDir "${params.outdata}/trend/mosaic/$product", mode:'copy'
 
     input:
     tuple val( product ), path('trend/*')

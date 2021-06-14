@@ -4,8 +4,8 @@ nextflow kuberun /workdir/B5-Workflow-Earth-Observation/EO-01/workflow-dsl2.nf \
 -v fonda-datasets:/data \
 -profile kubernetesConf \
 -queue-size 50 \
---inputdata /data/b5/eo-01/ \
---outdata /workdir/output/ \
+--inputdata /data/b5/eo-01 \
+--outdata /workdir/output \
 --groupSize 100 \
 --forceVer 3.6.5 \
 -pod-image fabianlehmann/nextflow:fix \
