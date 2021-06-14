@@ -2,6 +2,13 @@
 
 # set parameters - this is usually done by hand
 PARAM=$1
+TILES=$2
+
+# processing extent
+XMIN=$(sed '1d' $TILES | sed 's/[XY]//g' | cut -d '_' -f 1 | sort | head -n 1)
+XMAX=$(sed '1d' $TILES | sed 's/[XY]//g' | cut -d '_' -f 1 | sort | tail -n 1)
+YMIN=$(sed '1d' $TILES | sed 's/[XY]//g' | cut -d '_' -f 2 | sort | head -n 1)
+YMAX=$(sed '1d' $TILES | sed 's/[XY]//g' | cut -d '_' -f 2 | sort | tail -n 1)
 
 # pathes
 sed -i "/^DIR_LOWER /cDIR_LOWER = ard/" $PARAM
@@ -12,11 +19,13 @@ sed -i "/^FILE_ENDMEM /cFILE_ENDMEM = endmember.txt" $PARAM
 sed -i "/^FILE_TILE /cFILE_TILE = tiles.txt" $PARAM
 
 # threading
-sed -i "/^NTHREAD_READ /cNTHREAD_READ = 8" $PARAM
-sed -i "/^NTHREAD_COMPUTE /cNTHREAD_COMPUTE = 100" $PARAM
+sed -i "/^NTHREAD_READ /cNTHREAD_READ = 4" $PARAM
+sed -i "/^NTHREAD_COMPUTE /cNTHREAD_COMPUTE = 104" $PARAM
 sed -i "/^NTHREAD_WRITE /cNTHREAD_WRITE = 4" $PARAM
 
-# resolution
+# extent and resolution
+sed -i "/^X_TILE_RANGE /cX_TILE_RANGE = $XMIN $XMAX" $PARAM
+sed -i "/^Y_TILE_RANGE /cY_TILE_RANGE = $YMIN $YMAX" $PARAM
 sed -i "/^RESOLUTION /cRESOLUTION = 30" $PARAM
 
 # sensors
