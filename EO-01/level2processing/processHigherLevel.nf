@@ -17,7 +17,7 @@ process processHigherLevel{
     maxRetries 5
 
     cpus params.useCPU
-    memory { params.onlyTile ? '12000 MB' : '4000 MB' }
+    memory { params.onlyTile ? '12000 MB' : '3300 MB' }
 
     input:
     tuple val( tile ), path( "ard/${tile}/*" ), path( "ard/${tile}/*" ), path( "mask/${tile}/aoi.tif" )

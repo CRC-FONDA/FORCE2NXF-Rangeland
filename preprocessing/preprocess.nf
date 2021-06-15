@@ -17,7 +17,7 @@ process preprocess {
     maxRetries 5
 
     cpus params.useCPU
-    memory '5 GB'
+    memory '4500 MB'
 
     input:
     path data
