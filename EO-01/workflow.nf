@@ -105,9 +105,9 @@ process preprocess{
     file data from data.flatten().filter{ inRegion(it) }
     file cube from cubeFile
     file tile from tileAllow
-    file dem  from file( params.inputdata + 'dem/')
+    file dem  from file( params.inputdata + '/dem/')
     //data from https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1
-    file wvdb from file( params.inputdata + 'wvdb/')
+    file wvdb from file( params.inputdata + '/wvdb/')
 
     output:
     //One BOA image
