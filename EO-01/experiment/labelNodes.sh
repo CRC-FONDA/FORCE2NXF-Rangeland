@@ -18,8 +18,8 @@ fi
 
 #assign labels to nodes
 
-nodes=`kubectl get nodes --show-labels | grep ",node-role.kubernetes.io/master=" -v | awk '{print$1}' | tail -n +2 | head -n +$1 | sort`
+nodes=`kubectl get nodes --show-labels | grep "Ready" | awk '{print$1}' | head -n +$1 | sort`
 
 echo label nodes: $nodes
 
-kubectl label nodes $nodes eo-experiment=true
+kubectl label nodes $nodes eo-experiment=
