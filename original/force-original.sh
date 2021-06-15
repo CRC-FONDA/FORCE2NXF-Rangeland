@@ -50,6 +50,6 @@ time docker-force force-mosaic trend
 
 # pyramids
 echo "START: pyramids"
-time docker-force force-pyramid trend/mosaic/*
+time docker-force force-pyramid trend/*/*.tif
 
 exit 0
