@@ -22,4 +22,4 @@ nodes=`kubectl get nodes --show-labels | grep "Ready" | awk '{print$1}' | head -
 
 echo label nodes: $nodes
 
-kubectl label nodes $nodes eo-experiment=
+kubectl label nodes $nodes eo-experiment=true
