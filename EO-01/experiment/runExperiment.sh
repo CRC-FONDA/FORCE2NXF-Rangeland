@@ -2,7 +2,7 @@
 echo first parementer: number nodes, second parementer: trial
 
 #preparation
-bash removeResults.sh
+bash clearEnvironment.sh
 bash labelNodes.sh $1
 
 #execution phase
