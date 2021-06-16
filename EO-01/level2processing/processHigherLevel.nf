@@ -16,7 +16,7 @@ process processHigherLevel{
     errorStrategy 'retry'
     maxRetries 5
 
-    cpus params.useCPU
+    cpus params.useCPU * 2
     memory { params.onlyTile ? '12000 MB' : '3300 MB' }
 
     input:
