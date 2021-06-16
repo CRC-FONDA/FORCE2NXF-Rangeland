@@ -20,7 +20,7 @@ params.resolution = 30
 params.useCPU = 2
 params.onlyTile = null
 params.groupSize = 100
-params.forceVer = "latest"
+params.forceVer = "3.6.5"
 
 def inRegion = input -> {
     Integer date = input.simpleName.split("_")[3] as Integer
