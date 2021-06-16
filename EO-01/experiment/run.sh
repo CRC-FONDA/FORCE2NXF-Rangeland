@@ -12,4 +12,5 @@ nextflow kuberun /workdir/B5-Workflow-Earth-Observation/EO-01/workflow-dsl2.nf \
 -with-dag /workdir/output/dag.dot \
 -with-report /workdir/output/report.html \
 -with-timeline /workdir/output/timeline.html \
--with-trace /workdir/output/trace.txt
+-with-trace /workdir/output/trace.txt \
+-name eo-experiment-test-n$1-e$2
