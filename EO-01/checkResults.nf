@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 process checkResults {
 
-    container 'rocker/geospatial'
+    container 'rocker/geospatial:3.6.3'
     memory '12000 MB'
 
     input:
