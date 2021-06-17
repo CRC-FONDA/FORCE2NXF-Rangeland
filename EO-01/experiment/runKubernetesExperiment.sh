@@ -13,3 +13,5 @@ bash runOnKubernetes.sh $1 $2 > ./results/$1/$2/execution.log
 #finish phase
 bash collectResults.sh $1 $2
 bash clearPods.sh
+
+mv experiment.log ./results/$1/$2/experiment.log
