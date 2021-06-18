@@ -8,9 +8,9 @@ nextflow kuberun /workdir/B5-Workflow-Earth-Observation/EO-01/workflow-dsl2.nf \
 --outdata /workdir/output \
 --groupSize 100 \
 --forceVer 3.6.5 \
--pod-image fabianlehmann/nextflow:fix \
+-pod-image fabianlehmann/nextflow:fixConnectionReset \
 -with-dag /workdir/output/dag.dot \
 -with-report /workdir/output/report.html \
 -with-timeline /workdir/output/timeline.html \
 -with-trace /workdir/output/trace.txt \
--name eo-experiment-test-n$1-e$2
+-name $1
