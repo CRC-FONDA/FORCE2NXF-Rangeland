@@ -18,7 +18,7 @@ fi
 
 #assign labels to nodes
 
-nodes=`kubectl get nodes --show-labels | grep "Ready" | awk '{print$1}' | head -n +$1 | sort`
+nodes=`kubectl get nodes --show-labels | grep "Ready" | grep "wally" | awk '{print$1}' | head -n +$1 | sort`
 
 echo label nodes: $nodes
 
