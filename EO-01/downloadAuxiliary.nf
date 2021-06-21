@@ -6,7 +6,7 @@ process downloadAuxiliary{
 
     //Has to be downloaded anyways, so we can use it only for wget
     container "davidfrantz/force:${params.forceVer}"
-    memory '500 MB'
+    memory { 500.MB * task.attempt }
 
     output:
     path 'input/grid/datacube-definition.prj', emit: cubeFile

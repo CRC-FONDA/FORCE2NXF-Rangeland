@@ -7,7 +7,7 @@ process processMosaic{
 
     tag { product }
     container "davidfrantz/force:${params.forceVer}"
-    memory '1500 MB'
+    memory { 1500.MB * task.attempt }
     publishDir "${params.outdata}/trend/mosaic/$product", mode:'copy'
 
     input:
