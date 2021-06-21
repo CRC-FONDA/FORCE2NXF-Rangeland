@@ -6,6 +6,7 @@ process merge {
 
     container 'davidfrantz/force:dev'
     memory { 2000.MB * task.attempt }
+    time { 20.minute * task.attempt }
 
     input:
     path ("merge.r")

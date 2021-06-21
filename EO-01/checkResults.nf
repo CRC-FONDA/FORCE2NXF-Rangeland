@@ -4,6 +4,7 @@ process checkResults {
 
     container 'rocker/geospatial:3.6.3'
     memory { 12000.MB * task.attempt }
+    time { 10.minute * task.attempt }
 
     input:
     file{ "trend/?/*" }
