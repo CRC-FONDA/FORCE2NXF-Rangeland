@@ -1,5 +1,13 @@
-bash runExperiment.sh 15 1
+nodes=( 21 20 15 10 5 3 1 )
+runs=( 1 2 3 )
 
-bash runExperiment.sh 10 1
+for run in "${runs[@]}"
+do
+    for node in "${nodes[@]}"
+    do
 
-bash runExperiment.sh 5 1
+        echo "Run experiment for $node nodes, run: $run"
+        bash runKubernetesExperiment.sh $node $run
+
+    done
+done 

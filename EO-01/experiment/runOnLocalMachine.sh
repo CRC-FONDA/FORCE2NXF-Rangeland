@@ -1,7 +1,11 @@
+#!/bin/bash
+
+BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 mkdir -p ./results/local/$1/
 
 echo go
-nextflow run ../workflow-dsl2.nf \
+nextflow run $BIN/../workflow-dsl2.nf \
 --inputdata "/data/Jakku/fonda/data/EO-01/input" \
 --outdata "/data/Jakku/fonda/B5-EO-01-NF" \
 --groupSize 100 \

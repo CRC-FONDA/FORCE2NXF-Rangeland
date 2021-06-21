@@ -35,11 +35,9 @@ workflow {
     data = data.flatten().filter{ inRegion(it) }
     dem = file( params.inputdata + '/dem/')
     wvdb = file( params.inputdata + '/wvdb/')
-
-    downloadAuxiliary()
-    cubeFile = downloadAuxiliary.out.cubeFile
-    aoiFile = downloadAuxiliary.out.aoiFile
-    endmemberFile = downloadAuxiliary.out.endmemberFile
+    cubeFile = file( "${moduleDir}/auxiliary/datacube-definition.prj" )
+    aoiFile = file( "${moduleDir}/auxiliary/aoi.gpkg" )
+    endmemberFile = file( "${moduleDir}/auxiliary/hostert-2003.txt" )
 
     preprocessing(data, dem, wvdb, cubeFile, aoiFile)
     

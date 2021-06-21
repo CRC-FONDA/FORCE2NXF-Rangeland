@@ -17,7 +17,8 @@ process preprocess {
     maxRetries 5
 
     cpus params.useCPU
-    memory '4500 MB'
+    memory { 4500.MB * task.attempt }
+    time { 20.minute * task.attempt }
 
     input:
     path data
