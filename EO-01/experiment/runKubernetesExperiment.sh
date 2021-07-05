@@ -7,7 +7,7 @@ mkdir -p ./results/$1/$2/
 bash clearEnvironment.sh
 bash labelNodes.sh $1
 
-podName=eo-experiment-n$1-e$2
+podName=eo-experiment-r1-n$1-e$2
 
 #execution phase
 bash runOnKubernetes.sh $podName > ./results/$1/$2/execution.log
@@ -21,3 +21,5 @@ bash collectResults.sh $1 $2
 bash clearPods.sh
 
 mv experiment.log ./results/$1/$2/experiment.log
+
+touch experiment.log
