@@ -1,0 +1,286 @@
+digraph "dag" {
+p0 [shape=point,label="",fixedsize=true,width=0.1,xlabel="Channel.fromPath"];
+p1 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p0 -> p1;
+
+p1 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p2 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p1 -> p2 [label="data"];
+
+p2 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p3 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p2 -> p3;
+
+p3 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p16 [label="preprocessing:preprocess"];
+p3 -> p16 [label="data"];
+
+p4 [shape=point,label="",fixedsize=true,width=0.1];
+p6 [label="preprocessing:generateTileAllowList"];
+p4 -> p6 [label="aoi"];
+
+p5 [shape=point,label="",fixedsize=true,width=0.1];
+p6 [label="preprocessing:generateTileAllowList"];
+p5 -> p6 [label="tmp/datacube-definition.prj"];
+
+p6 [label="preprocessing:generateTileAllowList"];
+p16 [label="preprocessing:preprocess"];
+p6 -> p16;
+
+p7 [shape=point,label="",fixedsize=true,width=0.1];
+p9 [label="preprocessing:generateAnalysisMask"];
+p7 -> p9 [label="aoi"];
+
+p8 [shape=point,label="",fixedsize=true,width=0.1];
+p9 [label="preprocessing:generateAnalysisMask"];
+p8 -> p9 [label="mask/datacube-definition.prj"];
+
+p9 [label="preprocessing:generateAnalysisMask"];
+p10 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p9 -> p10;
+
+p10 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p11 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p10 -> p11;
+
+p11 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p12 [shape=point];
+p11 -> p12 [label="masks"];
+
+p13 [shape=point,label="",fixedsize=true,width=0.1];
+p16 [label="preprocessing:preprocess"];
+p13 -> p16 [label="cube"];
+
+p14 [shape=point,label="",fixedsize=true,width=0.1];
+p16 [label="preprocessing:preprocess"];
+p14 -> p16 [label="dem"];
+
+p15 [shape=point,label="",fixedsize=true,width=0.1];
+p16 [label="preprocessing:preprocess"];
+p15 -> p16 [label="wvdb"];
+
+p16 [label="preprocessing:preprocess"];
+p19 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p16 -> p19;
+
+p16 [label="preprocessing:preprocess"];
+p22 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p16 -> p22;
+
+p16 [label="preprocessing:preprocess"];
+p18 [shape=point];
+p16 -> p18;
+
+p16 [label="preprocessing:preprocess"];
+p17 [shape=point];
+p16 -> p17;
+
+p19 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p20 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p19 -> p20;
+
+p20 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p21 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p20 -> p21;
+
+p21 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p25 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p21 -> p25 [label="boaTiles"];
+
+p22 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p23 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p22 -> p23;
+
+p23 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p24 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p23 -> p24;
+
+p24 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p29 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p24 -> p29 [label="qaiTiles"];
+
+p25 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p26 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p25 -> p26;
+
+p26 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p27 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p26 -> p27;
+
+p27 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p28 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p27 -> p28;
+
+p28 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p39 [label="preprocessing:mergeBOA"];
+p28 -> p39 [label="boaTilesToMerge"];
+
+p29 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p30 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p29 -> p30;
+
+p30 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p31 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p30 -> p31;
+
+p31 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p32 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p31 -> p32;
+
+p32 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p42 [label="preprocessing:mergeQAI"];
+p32 -> p42 [label="qaiTilesToMerge"];
+
+p21 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p33 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p21 -> p33 [label="boaTiles"];
+
+p33 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p34 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p33 -> p34;
+
+p34 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p43 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p34 -> p43 [label="boaTilesDone"];
+
+p24 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p35 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p24 -> p35 [label="qaiTiles"];
+
+p35 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p36 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p35 -> p36;
+
+p36 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p46 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p36 -> p46 [label="qaiTilesDone"];
+
+p37 [shape=point,label="",fixedsize=true,width=0.1];
+p39 [label="preprocessing:mergeBOA"];
+p37 -> p39 [label="merge.r"];
+
+p38 [shape=point,label="",fixedsize=true,width=0.1];
+p39 [label="preprocessing:mergeBOA"];
+p38 -> p39 [label="cube"];
+
+p39 [label="preprocessing:mergeBOA"];
+p43 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p39 -> p43;
+
+p40 [shape=point,label="",fixedsize=true,width=0.1];
+p42 [label="preprocessing:mergeQAI"];
+p40 -> p42 [label="merge.r"];
+
+p41 [shape=point,label="",fixedsize=true,width=0.1];
+p42 [label="preprocessing:mergeQAI"];
+p41 -> p42 [label="cube"];
+
+p42 [label="preprocessing:mergeQAI"];
+p46 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p42 -> p46;
+
+p43 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p44 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p43 -> p44;
+
+p44 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p45 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p44 -> p45;
+
+p45 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p51 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p45 -> p51 [label="boaTiles"];
+
+p46 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p47 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p46 -> p47;
+
+p47 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p48 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p47 -> p48;
+
+p48 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p49 [shape=point];
+p48 -> p49 [label="qaiTiles"];
+
+p50 [shape=point,label="",fixedsize=true,width=0.1];
+p51 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p50 -> p51;
+
+p51 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p53 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p51 -> p53;
+
+p52 [shape=point,label="",fixedsize=true,width=0.1];
+p53 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p52 -> p53;
+
+p53 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p54 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p53 -> p54 [label="tilesAndMasks"];
+
+p54 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p57 [label="level2processing:processHigherLevel"];
+p54 -> p57 [label="tilesAndMasks"];
+
+p55 [shape=point,label="",fixedsize=true,width=0.1];
+p57 [label="level2processing:processHigherLevel"];
+p55 -> p57 [label="ard/datacube-definition.prj"];
+
+p56 [shape=point,label="",fixedsize=true,width=0.1];
+p57 [label="level2processing:processHigherLevel"];
+p56 -> p57 [label="endmember"];
+
+p57 [label="level2processing:processHigherLevel"];
+p58 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p57 -> p58;
+
+p58 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p59 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p58 -> p59;
+
+p59 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p60 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p59 -> p60 [label="trendFiles"];
+
+p60 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p62 [label="level2processing:processMosaic"];
+p60 -> p62 [label="trendFilesMosaic"];
+
+p61 [shape=point,label="",fixedsize=true,width=0.1];
+p62 [label="level2processing:processMosaic"];
+p61 -> p62 [label="trend/datacube-definition.prj"];
+
+p62 [label="level2processing:processMosaic"];
+p66 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p62 -> p66 [label="trendFiles"];
+
+p59 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p63 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p59 -> p63 [label="trendFiles"];
+
+p63 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p64 [label="level2processing:processPyramid"];
+p63 -> p64;
+
+p64 [label="level2processing:processPyramid"];
+p65 [shape=point];
+p64 -> p65;
+
+p66 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p67 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p66 -> p67;
+
+p67 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p68 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="buffer"];
+p67 -> p68;
+
+p68 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="buffer"];
+p70 [label="checkResults"];
+p68 -> p70 [label="groupedTrendData"];
+
+p69 [shape=point,label="",fixedsize=true,width=0.1];
+p70 [label="checkResults"];
+p69 -> p70 [label="reference"];
+
+}
