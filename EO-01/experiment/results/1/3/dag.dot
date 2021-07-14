@@ -1,0 +1,278 @@
+digraph "dag" {
+p0 [shape=point,label="",fixedsize=true,width=0.1,xlabel="Channel.fromPath"];
+p1 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p0 -> p1;
+
+p1 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p2 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p1 -> p2 [label="data"];
+
+p2 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p3 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p2 -> p3;
+
+p3 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p15 [label="preprocessing:preprocess"];
+p3 -> p15 [label="data"];
+
+p4 [shape=point,label="",fixedsize=true,width=0.1];
+p6 [label="preprocessing:generateTileAllowList"];
+p4 -> p6 [label="aoi"];
+
+p5 [shape=point,label="",fixedsize=true,width=0.1];
+p6 [label="preprocessing:generateTileAllowList"];
+p5 -> p6 [label="tmp/datacube-definition.prj"];
+
+p6 [label="preprocessing:generateTileAllowList"];
+p15 [label="preprocessing:preprocess"];
+p6 -> p15;
+
+p7 [shape=point,label="",fixedsize=true,width=0.1];
+p9 [label="preprocessing:generateAnalysisMask"];
+p7 -> p9 [label="aoi"];
+
+p8 [shape=point,label="",fixedsize=true,width=0.1];
+p9 [label="preprocessing:generateAnalysisMask"];
+p8 -> p9 [label="mask/datacube-definition.prj"];
+
+p9 [label="preprocessing:generateAnalysisMask"];
+p10 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p9 -> p10;
+
+p10 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p11 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p10 -> p11;
+
+p11 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p49 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p11 -> p49 [label="masks"];
+
+p12 [shape=point,label="",fixedsize=true,width=0.1];
+p15 [label="preprocessing:preprocess"];
+p12 -> p15 [label="cube"];
+
+p13 [shape=point,label="",fixedsize=true,width=0.1];
+p15 [label="preprocessing:preprocess"];
+p13 -> p15 [label="dem"];
+
+p14 [shape=point,label="",fixedsize=true,width=0.1];
+p15 [label="preprocessing:preprocess"];
+p14 -> p15 [label="wvdb"];
+
+p15 [label="preprocessing:preprocess"];
+p18 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p15 -> p18;
+
+p15 [label="preprocessing:preprocess"];
+p21 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p15 -> p21;
+
+p15 [label="preprocessing:preprocess"];
+p17 [shape=point];
+p15 -> p17;
+
+p15 [label="preprocessing:preprocess"];
+p16 [shape=point];
+p15 -> p16;
+
+p18 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p19 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p18 -> p19;
+
+p19 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p20 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p19 -> p20;
+
+p20 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p24 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p20 -> p24 [label="boaTiles"];
+
+p21 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p22 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p21 -> p22;
+
+p22 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p23 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p22 -> p23;
+
+p23 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p28 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p23 -> p28 [label="qaiTiles"];
+
+p24 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p25 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p24 -> p25;
+
+p25 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p26 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p25 -> p26;
+
+p26 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p27 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p26 -> p27;
+
+p27 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p38 [label="preprocessing:mergeBOA"];
+p27 -> p38 [label="boaTilesToMerge"];
+
+p28 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p29 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p28 -> p29;
+
+p29 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p30 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p29 -> p30;
+
+p30 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p31 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p30 -> p31;
+
+p31 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p41 [label="preprocessing:mergeQAI"];
+p31 -> p41 [label="qaiTilesToMerge"];
+
+p20 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p32 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p20 -> p32 [label="boaTiles"];
+
+p32 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p33 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p32 -> p33;
+
+p33 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p42 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p33 -> p42 [label="boaTilesDone"];
+
+p23 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p34 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p23 -> p34 [label="qaiTiles"];
+
+p34 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p35 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p34 -> p35;
+
+p35 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p45 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p35 -> p45 [label="qaiTilesDone"];
+
+p36 [shape=point,label="",fixedsize=true,width=0.1];
+p38 [label="preprocessing:mergeBOA"];
+p36 -> p38 [label="merge.r"];
+
+p37 [shape=point,label="",fixedsize=true,width=0.1];
+p38 [label="preprocessing:mergeBOA"];
+p37 -> p38 [label="cube"];
+
+p38 [label="preprocessing:mergeBOA"];
+p42 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p38 -> p42;
+
+p39 [shape=point,label="",fixedsize=true,width=0.1];
+p41 [label="preprocessing:mergeQAI"];
+p39 -> p41 [label="merge.r"];
+
+p40 [shape=point,label="",fixedsize=true,width=0.1];
+p41 [label="preprocessing:mergeQAI"];
+p40 -> p41 [label="cube"];
+
+p41 [label="preprocessing:mergeQAI"];
+p45 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p41 -> p45;
+
+p42 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p43 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p42 -> p43;
+
+p43 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p44 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p43 -> p44;
+
+p44 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p48 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p44 -> p48 [label="boaTiles"];
+
+p45 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="concat"];
+p46 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p45 -> p46;
+
+p46 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p47 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p46 -> p47;
+
+p47 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p48 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p47 -> p48 [label="qaiTiles"];
+
+p48 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p49 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p48 -> p49;
+
+p49 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="join"];
+p50 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p49 -> p50 [label="tilesAndMasks"];
+
+p50 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p53 [label="level2processing:processHigherLevel"];
+p50 -> p53 [label="tilesAndMasks"];
+
+p51 [shape=point,label="",fixedsize=true,width=0.1];
+p53 [label="level2processing:processHigherLevel"];
+p51 -> p53 [label="ard/datacube-definition.prj"];
+
+p52 [shape=point,label="",fixedsize=true,width=0.1];
+p53 [label="level2processing:processHigherLevel"];
+p52 -> p53 [label="endmember"];
+
+p53 [label="level2processing:processHigherLevel"];
+p54 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p53 -> p54;
+
+p54 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p55 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p54 -> p55;
+
+p55 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p56 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p55 -> p56 [label="trendFiles"];
+
+p56 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="groupTuple"];
+p58 [label="level2processing:processMosaic"];
+p56 -> p58 [label="trendFilesMosaic"];
+
+p57 [shape=point,label="",fixedsize=true,width=0.1];
+p58 [label="level2processing:processMosaic"];
+p57 -> p58 [label="trend/datacube-definition.prj"];
+
+p58 [label="level2processing:processMosaic"];
+p62 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p58 -> p62 [label="trendFiles"];
+
+p55 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p59 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p55 -> p59 [label="trendFiles"];
+
+p59 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="filter"];
+p60 [label="level2processing:processPyramid"];
+p59 -> p60;
+
+p60 [label="level2processing:processPyramid"];
+p61 [shape=point];
+p60 -> p61;
+
+p62 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="map"];
+p63 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p62 -> p63;
+
+p63 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="flatten"];
+p64 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="buffer"];
+p63 -> p64;
+
+p64 [shape=circle,label="",fixedsize=true,width=0.1,xlabel="buffer"];
+p66 [label="checkResults"];
+p64 -> p66 [label="groupedTrendData"];
+
+p65 [shape=point,label="",fixedsize=true,width=0.1];
+p66 [label="checkResults"];
+p65 -> p66 [label="reference"];
+
+}
