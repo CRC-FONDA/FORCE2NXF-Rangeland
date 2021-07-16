@@ -47,6 +47,6 @@ workflow {
 
     groupedTrendData = higherLevel.out.trendFiles.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
 
-    checkResults( groupedTrendData, file( "${moduleDir}/test/reference.RData" ) )
+    checkResults( groupedTrendData, file( "${moduleDir}/checkData/reference.RData" ) )
 
 }
