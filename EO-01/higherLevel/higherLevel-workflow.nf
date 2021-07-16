@@ -14,7 +14,7 @@ params.useCPU = 2
 params.onlyTile = null
 params.forceVer = "latest"
 
-workflow level2processing {
+workflow higherLevel {
 
     take: 
         tilesAndMasks

@@ -6,7 +6,7 @@ nextflow.enable.dsl=2
 include { downloadAuxiliary } from './downloadAuxiliary'
 include { checkResults } from './checkResults'
 include { preprocessing } from './preprocessing/preprocessing-workflow'
-include { level2processing } from './level2processing/level2-workflow'
+include { higherLevel } from './higherLevel/higherLevel-workflow'
 
 params.inputdata = ""
 params.outdata = ""
@@ -43,9 +43,9 @@ workflow {
     
     preprocessedData = preprocessing.out.tilesAndMasks.filter { params.onlyTile ? it[0] == params.onlyTile : true }
 
-    level2processing( preprocessedData, cubeFile, endmemberFile )
+    higherLevel( preprocessedData, cubeFile, endmemberFile )
 
-    groupedTrendData = level2processing.out.trendFiles.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
+    groupedTrendData = higherLevel.out.trendFiles.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
 
     checkResults( groupedTrendData, file( "${moduleDir}/test/reference.RData" ) )
 
