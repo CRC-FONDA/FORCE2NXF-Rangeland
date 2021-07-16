@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: eo-experiment-r4-n15-e1
+  namespace: default
+  labels: {app: nextflow, runName: eo-experiment-r4-n15-e1}
+spec:
+  restartPolicy: Never
+  containers:
+  - name: eo-experiment-r4-n15-e1
+    image: fabianlehmann/nextflow:connectionResetFix
+    command: [/bin/bash, -c, source /etc/nextflow/init.sh; nextflow run /workdir/B5-Workflow-Earth-Observation/EO-01/workflow-dsl2.nf
+        -name eo-experiment-r4-n15-e1 -qs 100 -with-timeline /workdir/output/timeline.html
+        -with-dag /workdir/output/dag.dot --inputdata /data/b5/eo-01 --outdata /workdir/output
+        --groupSize 100 --forceVer 3.6.5]
+    imagePullPolicy: IfNotPresent
+    env:
+    - {name: NXF_WORK, value: /workdir/work}
+    - {name: NXF_ASSETS, value: /workdir/projects}
+    - {name: NXF_EXECUTOR, value: k8s}
+    - {name: NXF_ANSI_LOG, value: 'false'}
+    volumeMounts:
+    - {name: vol-1, mountPath: /data}
+    - {name: vol-2, mountPath: /workdir}
+    - {name: vol-3, mountPath: /etc/nextflow}
+  serviceAccountName: nextflow
+  securityContext: {runAsUser: 0}
+  volumes:
+  - name: vol-1
+    persistentVolumeClaim: {claimName: fonda-datasets}
+  - name: vol-2
+    persistentVolumeClaim: {claimName: ceph-fs-volume}
+  - name: vol-3
+    configMap: {name: nf-config-54d9974e}

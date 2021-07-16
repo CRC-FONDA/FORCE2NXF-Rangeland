@@ -1,0 +1,10 @@
+Jun-30 12:22:59.089 [main] DEBUG nextflow.cli.Launcher - $> nextflow kuberun /workdir/B5-Workflow-Earth-Observation/EO-01/workflow-dsl2.nf -v 'ceph-fs-volume:/workdir' -v 'fonda-datasets:/data' -profile kubernetesConf -queue-size 100 --inputdata /data/b5/eo-01 --outdata /workdir/output --groupSize 100 --forceVer 3.6.5 -pod-image 'fabianlehmann/nextflow:connectionResetFix' -with-dag /workdir/output/dag.dot -with-report /workdir/output/report.html -with-timeline /workdir/output/timeline.html -name eo-experiment-r4-n15-e2
+Jun-30 12:22:59.165 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/ubuntu/data/data/paper/B5-Workflow-Earth-Observation/EO-01/experiment/nextflow.config
+Jun-30 12:22:59.166 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/ubuntu/data/data/paper/B5-Workflow-Earth-Observation/EO-01/experiment/nextflow.config
+Jun-30 12:22:59.186 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `kubernetesConf`
+Jun-30 12:22:59.894 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [kubernetesConf]
+Jun-30 12:23:00.051 [main] DEBUG nextflow.k8s.K8sConfig - Kubernetes workDir=/workdir/work; projectDir=/workdir/projects; volumeClaims=[fonda-datasets, ceph-fs-volume]
+Jun-30 12:23:00.701 [main] DEBUG nextflow.k8s.K8sDriverLauncher - Created K8s configMap with name: nf-config-e7167ddf
+Jun-30 12:23:00.757 [main] INFO  nextflow.k8s.K8sDriverLauncher - Launcher pod spec file: .nextflow.pod.yaml
+Jun-30 16:23:07.796 [main] DEBUG nextflow.k8s.K8sDriverLauncher - Wait for pod termination name=eo-experiment-r4-n15-e2
+Jun-30 16:24:39.609 [main] WARN  nextflow.k8s.K8sDriverLauncher - Unable to fetch pod exit status -- pod=eo-experiment-r4-n15-e2 state=[running:[startedAt:2021-06-30T12:23:03Z]]
