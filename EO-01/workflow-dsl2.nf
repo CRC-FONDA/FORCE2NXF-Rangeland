@@ -5,7 +5,7 @@ nextflow.enable.dsl=2
 
 include { downloadAuxiliary } from './downloadAuxiliary'
 include { checkResults } from './checkResults'
-include { preprocessing } from '../preprocessing/preprocessing-workflow'
+include { preprocessing } from './preprocessing/preprocessing-workflow'
 include { level2processing } from './level2processing/level2-workflow'
 
 params.inputdata = ""
