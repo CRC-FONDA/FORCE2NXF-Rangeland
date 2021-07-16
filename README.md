@@ -4,7 +4,7 @@
 
 This repository focuses on a workflow to re-assess rangeland degradation in the Mediterranean, as reported 20 years ago. However, we found that total vegetation on the island of Crete, Greece, did rather increase. Yet, we still cannot dispel that vegetation degradation occurred as most increase in vegetation cover was found in the woody vegetation, which potentially represents a degradation process related to the increase of impalatable species.
 
-This repository offers two implementations of the workflow. The [original one](original/force-original.sh) in FORCE and a [ported one](EO-01/workflow-dsl2.nf) in Nextflow.
+This repository offers two implementations of the workflow. The [original one](originalWF/force-original.sh) in FORCE and a [ported one](nextflowWF/workflow-dsl2.nf) in Nextflow.
 We refer to the workflow paper itself: [tbd](abc) and our paper: [tbd](abc) comparing the different implementations. 
 
 <p align="center">
@@ -27,7 +27,6 @@ To run in Docker:
 ### Download input data
 To execute both workflows, the following data is required:
 ```
-mkdir inputdata
 cd inputdata
 ```
 #### Digital Elevation Model (dem): 
@@ -48,14 +47,14 @@ cd download
 mkdir meta
 force-level1-csd -u -s "LND04 LND05 LND07" meta
 mkdir data
-force-level1-csd -s "LND04 LND05 LND07" -d "19840101,20061231" -c 0,70 meta/ data/ queue.txt ../../EO-01/auxiliary/aoi.gpkg
+force-level1-csd -s "LND04 LND05 LND07" -d "19840101,20061231" -c 0,70 meta/ data/ queue.txt ../../nextflowWF/auxiliary/aoi.gpkg
 ```
 
 ### Execute workflow
 
 #### Original workflow
 
-Adjust workdir and input pathes in [force-original.sh](original/force-original.sh)
+Adjust workdir and input pathes in [force-original.sh](originalWF/force-original.sh)
 ```
 cd original
 bash force-original.sh
@@ -64,7 +63,7 @@ bash force-original.sh
 #### Nextflow workflow
 ##### Local
 ```
-cd EO-01
+cd nextflowWF
 nextflow run workflow-dsl2.nf \
 -c nextflow.config \
 --inputdata ../inputdata \
@@ -76,28 +75,28 @@ nextflow run workflow-dsl2.nf \
 ##### Kubernetes
 1. Setup a user role
 ```
-kubectl -f EO-01/kubernetes/nextflow-pod-role.yaml
-kubectl -f EO-01/kubernetes/nextflow-role-binding.yaml
+kubectl -f kubernetes/nextflow-pod-role.yaml
+kubectl -f kubernetes/nextflow-role-binding.yaml
 ```
 2. setup a read-write-many storage, in the following: ceph-fs-volume
 ```
-kubectl -f EO-01/kubernetes/ceph-fs.yaml
+kubectl -f kubernetes/ceph-fs.yaml
 ```
 3. setup a data storage (read-many +), in the following: datasets
  - repeat the last step with a new volume, or upload your data in the created one
 4. clone this repository in the root directory of the ceph-fs-volume
 ```
-kubectl -f EO-01/kubernetes/ceph-pod.yaml
+kubectl -f kubernetes/ceph-pod.yaml
 kubectl exec ceph-pod -it -n default -- /bin/bash
 cd /workdir
 git clone https://github.com/CRC-FONDA/B5-Workflow-Earth-Observation.git
 ```
-5. adjust the [nextflow.config](EO-01/nextflow.config) according to your needs
+5. adjust the [nextflow.config](nextflowWF/nextflow.config) according to your needs
 
 6. run Nextflow workflow
 ```
-cd EO-01
-nextflow kuberun /workdir/B5-Workflow-Earth-Observation/EO-01/workflow-dsl2.nf \ #cloned repository from git
+cd nextflowWF
+nextflow kuberun /workdir/B5-Workflow-Earth-Observation/nextflowWF/workflow-dsl2.nf \ #cloned repository from git
 -c nextflow.config \
 -v ceph-fs-volume:/workdir \ # mount the read-write-many volume
 -v datasets:/data \ # mount the input data
@@ -115,21 +114,21 @@ nextflow kuberun /workdir/B5-Workflow-Earth-Observation/EO-01/workflow-dsl2.nf \
 
 We performed two types of experiments to investigate whether the ported workflow scales as expected and to detect potential bottlenecks. We first ran the original workflow in its original environment to obtain confirmed results and ensured that all other configurations produce the same results. We subtracted the runtime of the check-result task in the Nextflow workflow from the overall execution time, to achieve comparable results. 
 
-Experiments were repeated three times ([Results](EO-01/experiment/results)); we report the median of the measured runtimes. We measure wall-clock execution times rounded to minutes. For the distributed setting, we also report on efficiency of task executions, defined as the theoretical time obtained by dividing single node execution time through the number of nodes, divided by the observed runtime. Thus, an efficiency of 1 means perfect scaling, while an efficiency of 0.5, for instance, means that the distributed runtime is only half as good as theoretically possible. We utilized Nextflow version 21.04.0-edge with bugfixes [(Fix extended glob)](https://github.com/nextflow-io/nextflow/pull/2182) [(Fix: Connection-reset crashes the workflow)](https://github.com/nextflow-io/nextflow/pull/2174) and Kubernetes version 1.19.3.
+Experiments were repeated three times ([Results](experiment/results)); we report the median of the measured runtimes. We measure wall-clock execution times rounded to minutes. For the distributed setting, we also report on efficiency of task executions, defined as the theoretical time obtained by dividing single node execution time through the number of nodes, divided by the observed runtime. Thus, an efficiency of 1 means perfect scaling, while an efficiency of 0.5, for instance, means that the distributed runtime is only half as good as theoretically possible. We utilized Nextflow version 21.04.0-edge with bugfixes [(Fix extended glob)](https://github.com/nextflow-io/nextflow/pull/2182) [(Fix: Connection-reset crashes the workflow)](https://github.com/nextflow-io/nextflow/pull/2174) and Kubernetes version 1.19.3.
 
 #### Execute
 
 We configured our Kubernetes cluster in a way we described in the previous paragraphs.
 
 ```
-cd EO-01/experiment/
+cd experiment/
 bash startOrchestration.sh
 ```
 
 #### Results
 
-Results like traces, reports, etc. can be found in the [results](EO-01/experiment/results) directory: 
+Results like traces, reports, etc. can be found in the [results](experiment/results) directory: 
 
 #### Plots
 
-To evaluate the results, we analyzed the traces with the [Analysis.ipynb](EO-01/experiment/Analysis.ipynb). The plots generated can be found in [plots/](EO-01/experiment/plots/).
+To evaluate the results, we analyzed the traces with the [Analysis.ipynb](experiment/Analysis.ipynb). The plots generated can be found in [plots/](experiment/plots/).
