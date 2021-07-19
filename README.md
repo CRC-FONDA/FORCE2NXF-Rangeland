@@ -25,7 +25,7 @@ To run in Docker:
 
 
 ### Download input data
-To execute both workflows, the following data is required:
+To execute both workflows, the following data are required ([filelist](experiment/filelist.txt)):
 ```
 cd inputdata
 ```
