@@ -1,4 +1,4 @@
-nodes=( 21 20 15 10 5 3 1 )
+nodes=( 21 20 15 14 10 5 3 1 )
 runs=( 1 2 3 )
 
 for run in "${runs[@]}"
