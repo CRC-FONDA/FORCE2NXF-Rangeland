@@ -1,8 +1,8 @@
-# Earth-Observation-Workflow
+# FORCE on Nextflow: Scalable Analysis of Earth Observation data on Commodity Clusters
 
 ## Long-term vegetation dynamics in the Mediterranean
 
-This repository focuses on a workflow to re-assess rangeland degradation in the Mediterranean, as reported 20 years ago. However, we found that total vegetation on the island of Crete, Greece, did rather increase. Yet, we still cannot dispel that vegetation degradation occurred as most increase in vegetation cover was found in the woody vegetation, which potentially represents a degradation process related to the increase of impalatable species.
+This repository focuses on a specific workflow to re-assess the widespread rangeland degradation in the Mediterranean as reported 20 years ago with limited input data. With the unlimited data access of today, however, we found that total vegetation on the island of Crete, Greece, did rather increase. Yet, we still cannot dispel that vegetation degradation occurred as most increase in vegetation cover was found in the woody vegetation, which potentially represents a degradation process related to the increase of impalatable species.
 
 This repository offers two implementations of the workflow. The [original one](originalWF/force-original.sh) in FORCE and a [ported one](nextflowWF/workflow-dsl2.nf) in Nextflow.
 We refer to the workflow paper itself: [tbd](abc) and our paper: [tbd](abc) comparing the different implementations. 
@@ -11,7 +11,7 @@ We refer to the workflow paper itself: [tbd](abc) and our paper: [tbd](abc) comp
   <img src="DAG_both.jpg" width = "50%">
 </p>
 
-*DAGs: The left DAG represents the original implementation in FORCE, right DAG the ported Version in Nextflow. Boxes represent processes and arrows their mutual dependencies. Solid arrows mean that a parent task must finish completely before the dependent task can start, whereas dashed arrows indicate that a dependend task can start as soon as a first data item has been processed by the parent. Solid boxed mark CPU-, dashed boxes IO-bound tasks.*
+*DAGs: The left DAG represents the original implementation in FORCE, right DAG the ported Version in Nextflow. Boxes represent processes and arrows their execution order (left) or mutual dependencies (right). Solid arrows mean that a parent task must finish completely before the dependent task can start, whereas dashed arrows indicate that a dependent task can start as soon as a first data item has been processed by the parent. Solid boxed mark CPU-, dashed boxes IO-bound tasks. Numbers in brackets represent the number of executions.*
 
 Before you start, make sure you installed:
 - [FORCE](https://davidfrantz.github.io/code/force/)
