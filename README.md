@@ -89,14 +89,14 @@ kubectl -f kubernetes/ceph-fs.yaml
 kubectl -f kubernetes/ceph-pod.yaml
 kubectl exec ceph-pod -it -n default -- /bin/bash
 cd /workdir
-git clone https://github.com/CRC-FONDA/B5-Workflow-Earth-Observation.git
+git clone https://github.com/CRC-FONDA/FORCE2NXF-Rangeland.git
 ```
 5. adjust the [nextflow.config](nextflowWF/nextflow.config) according to your needs
 
 6. run Nextflow workflow
 ```
 cd nextflowWF
-nextflow kuberun /workdir/B5-Workflow-Earth-Observation/nextflowWF/workflow-dsl2.nf \ #cloned repository from git
+nextflow kuberun /workdir/FORCE2NXF-Rangeland/nextflowWF/workflow-dsl2.nf \ #cloned repository from git
 -c nextflow.config \
 -v ceph-fs-volume:/workdir \ # mount the read-write-many volume
 -v datasets:/data \ # mount the input data
