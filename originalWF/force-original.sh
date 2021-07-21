@@ -5,32 +5,35 @@ set -e
 
 BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+INPUTDIR=$1
+WORKDIR=$2
+
 # Docker prep
-WORKDIR=/data/Jakku/fonda/B5-EO-01
 IMAGE=davidfrantz/force:3.6.5
 shopt -s expand_aliases
-alias docker-force='docker run --rm -it -v $WORKDIR:/data/eo -w /data/eo -u $(id -u):$(id -g) $IMAGE'
-
+alias docker-force='docker run --rm -it -v $INPUTDIR:/data/input -v $WORKDIR:/data/eo -w /data/eo -u $(id -u):$(id -g) $IMAGE'
 
 # make directories
+cd $WORKDIR
 mkdir -p mask ard log tmp trend
 
 # copy datacube definition to mask directory
-cp datacube-definition.prj mask/
+cp $INPUTDIR/grid/datacube-definition.prj mask/
 
 # generate processing masks
 echo "START: generate masks"
-time docker-force force-cube aoi.gpkg mask rasterize 30
+time docker-force force-cube /data/input/vector/aoi.gpkg mask rasterize 30
 
 # generate a tile allow-list
 echo "START: tile allow-list"
-time docker-force force-tile-extent aoi.gpkg mask tiles.txt
+time docker-force force-tile-extent /data/input/vector/aoi.gpkg mask tiles.txt
 
 # Level 2 parameter file
 echo "START: Level 2 Processing"
 docker-force force-parameter . LEVEL2 0
 mv LEVEL2-skeleton.prm ard.prm
-$BIN/force-l2ps-params.sh ard.prm datacube-definition.prj # usually done by hand
+cp $INPUTDIR/download/data/queue.txt queue.txt
+$BIN/force-l2ps-params.sh ard.prm $INPUTDIR/grid/datacube-definition.prj # usually done by hand
 
 # preprocessing to Level 2 ARD
 time docker-force force-level2 ard.prm

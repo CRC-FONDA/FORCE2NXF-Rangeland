@@ -15,7 +15,7 @@ sed -i "/^DIR_LOWER /cDIR_LOWER = ard/" $PARAM
 sed -i "/^DIR_HIGHER /cDIR_HIGHER = trend/" $PARAM
 sed -i "/^DIR_MASK /cDIR_MASK = mask/" $PARAM
 sed -i "/^BASE_MASK /cBASE_MASK = aoi.tif" $PARAM
-sed -i "/^FILE_ENDMEM /cFILE_ENDMEM = endmember.txt" $PARAM
+sed -i "/^FILE_ENDMEM /cFILE_ENDMEM = /data/input/endmember/hostert-2003.txt" $PARAM
 sed -i "/^FILE_TILE /cFILE_TILE = tiles.txt" $PARAM
 
 # threading
