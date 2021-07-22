@@ -4,8 +4,8 @@
 
 This repository focuses on a specific workflow to re-assess the widespread rangeland degradation in the Mediterranean as reported 20 years ago with limited input data. With the unlimited data access of today, however, we found that total vegetation on the island of Crete, Greece, did rather increase. Yet, we still cannot dispel that vegetation degradation occurred as most increase in vegetation cover was found in the woody vegetation, which potentially represents a degradation process related to the increase of impalatable species.
 
-This repository offers two implementations of the workflow. The [original one](originalWF/force-original.sh) in FORCE and a [ported one](nextflowWF/workflow-dsl2.nf) in Nextflow.
-We refer to the workflow paper itself: [tbd](abc) and our paper: [tbd](abc) comparing the different implementations. 
+This repository offers two implementations of the workflow. The [original one](originalWF/force-original.sh) in standalone FORCE and a [ported one](nextflowWF/workflow-dsl2.nf) in FORCE on Nextflow.
+We refer to the thematic workflow paper itself: [in preparation](abc), and [our paper](abc) comparing the different implementations. 
 
 <p align="center">
   <img src="DAG_both.jpg" width = "50%">
@@ -17,6 +17,8 @@ Before you start, make sure you installed:
 - [FORCE](https://davidfrantz.github.io/code/force/)
 - [Nextflow](https://www.nextflow.io/)
 
+*The workflow itself uses [FORCE in Docker](https://force-eo.readthedocs.io/en/latest/setup/docker.html). However, you may use FORCE to download necessary input data.*
+
 To run on Kubernetes:
 - [Kubectl](https://kubernetes.io/docs/reference/kubectl/overview/)
 
@@ -25,30 +27,26 @@ To run in Docker:
 
 
 ### Download input data
-To execute both workflows, the following data are required ([filelist](experiment/filelist.txt)):
+To execute both workflows, the following data are required ([filelist](experiment/filelist.txt)).
+Smaller datasets are already included in this repository:
 ```
 cd inputdata
-```
-#### Digital Elevation Model (dem): 
-```
-tbd
 ```
 #### Water Vapor Database (wvdb):
 ```
 wget -O wvp-global.tar.gz https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1
-mkdir wvdb
 tar -xzf wvp-global.tar.gz --directory wvdb/
 rm wvp-global.tar.gz
 ```
 #### Landsat observations: 
 ```
-mkdir download
 cd download
-mkdir meta
+mkdir -p meta
 force-level1-csd -u -s "LND04 LND05 LND07" meta
-mkdir data
-force-level1-csd -s "LND04 LND05 LND07" -d "19840101,20061231" -c 0,70 meta/ data/ queue.txt ../../nextflowWF/auxiliary/aoi.gpkg
+mkdir -p data
+force-level1-csd -s "LND04 LND05 LND07" -d "19840101,20061231" -c 0,70 meta/ data/ queue.txt ../vector/aoi.gpkg
 ```
+*For the original workflow, the file queue (``queue.txt``), needs to hold filenames relative to ``/data/input/``, which is the mountpoint of the ``inputdata`` directory within the Docker container (i.e., ``-v path-to-repo/inputdata:/data/input``);  [see this example](https://github.com/CRC-FONDA/FORCE2NXF-Rangeland/blob/main/inputdata/download/data/queue.txt).*
 
 ### Execute workflow
 
@@ -56,8 +54,7 @@ force-level1-csd -s "LND04 LND05 LND07" -d "19840101,20061231" -c 0,70 meta/ dat
 
 Adjust workdir and input pathes in [force-original.sh](originalWF/force-original.sh)
 ```
-cd original
-bash force-original.sh
+time originalWF/force-original.sh inputdata outputdata &> outputdata/stdout.log
 ```
 
 #### Nextflow workflow
