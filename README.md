@@ -53,7 +53,7 @@ force-level1-csd -s "LND04 LND05 LND07" -d "19840101,20061231" -c 0,70 meta/ dat
 #### Original workflow
 
 Adjust input and output pathes to your needs.
-You will also need to adapt parallelization parameters in [force-l2ps-param.sh, ll. 28-30](https://github.com/CRC-FONDA/FORCE2NXF-Rangeland/blob/main/originalWF/force-l2ps-param.sh) and [force-hlps-param.sh, ll. 22-24](https://github.com/CRC-FONDA/FORCE2NXF-Rangeland/blob/main/originalWF/force-hlps-param.sh) to settings that will work on your machine.
+You will also need to adapt parallelization parameters in [force-l2ps-param.sh, ll. 28-30](https://github.com/CRC-FONDA/FORCE2NXF-Rangeland/blob/main/originalWF/force-l2ps-params.sh) and [force-hlps-param.sh, ll. 22-24](https://github.com/CRC-FONDA/FORCE2NXF-Rangeland/blob/main/originalWF/force-hlps-params.sh) to settings that will work on your machine.
 ```
 time originalWF/force-original.sh $PWD/inputdata $PWD/outputdata &> outputdata/stdout.log
 ```
