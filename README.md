@@ -32,12 +32,6 @@ Smaller datasets are already included in this repository:
 ```
 cd inputdata
 ```
-#### Water Vapor Database (wvdb):
-```
-wget -O wvp-global.tar.gz https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1
-tar -xzf wvp-global.tar.gz --directory wvdb/
-rm wvp-global.tar.gz
-```
 #### Landsat observations: 
 For infos on Landsat, see [here](https://www.usgs.gov/core-science-systems/nli/landsat).
 ```
@@ -48,6 +42,14 @@ mkdir -p data
 force-level1-csd -s "LND04 LND05 LND07" -d "19840101,20061231" -c 0,70 meta/ data/ queue.txt vector/aoi.gpkg
 ```
 *For the original workflow, the file queue (``queue.txt``), needs to hold filenames relative to ``/data/input/``, which is the mountpoint of the ``inputdata`` directory within the Docker container (i.e., ``-v path-to-repo/inputdata:/data/input``);  [see this example](inputdata/download/data/queue.txt).*
+
+#### Water Vapor Database (wvdb):
+For infos on the water vapor database, see [here](https://zenodo.org/record/4468701).
+```
+wget -O wvp-global.tar.gz https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1
+tar -xzf wvp-global.tar.gz --directory wvdb/
+rm wvp-global.tar.gz
+```
 
 ### Execute workflow
 
