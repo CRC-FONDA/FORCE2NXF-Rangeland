@@ -54,7 +54,7 @@ force-level1-csd -s "LND04 LND05 LND07" -d "19840101,20061231" -c 0,70 meta/ dat
 
 Adjust workdir and input pathes in [force-original.sh](originalWF/force-original.sh)
 ```
-time originalWF/force-original.sh inputdata outputdata &> outputdata/stdout.log
+time originalWF/force-original.sh $PWD/inputdata $PWD/outputdata &> outputdata/stdout.log
 ```
 
 #### Nextflow workflow
