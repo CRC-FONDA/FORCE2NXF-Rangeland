@@ -39,6 +39,7 @@ tar -xzf wvp-global.tar.gz --directory wvdb/
 rm wvp-global.tar.gz
 ```
 #### Landsat observations: 
+For infos on Landsat, see [here](https://www.usgs.gov/core-science-systems/nli/landsat).
 ```
 cd download
 mkdir -p meta
