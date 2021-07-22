@@ -47,14 +47,14 @@ force-level1-csd -u -s "LND04 LND05 LND07" meta
 mkdir -p data
 force-level1-csd -s "LND04 LND05 LND07" -d "19840101,20061231" -c 0,70 meta/ data/ queue.txt vector/aoi.gpkg
 ```
-*For the original workflow, the file queue (``queue.txt``), needs to hold filenames relative to ``/data/input/``, which is the mountpoint of the ``inputdata`` directory within the Docker container (i.e., ``-v path-to-repo/inputdata:/data/input``);  [see this example](https://github.com/CRC-FONDA/FORCE2NXF-Rangeland/blob/main/inputdata/download/data/queue.txt).*
+*For the original workflow, the file queue (``queue.txt``), needs to hold filenames relative to ``/data/input/``, which is the mountpoint of the ``inputdata`` directory within the Docker container (i.e., ``-v path-to-repo/inputdata:/data/input``);  [see this example](inputdata/download/data/queue.txt).*
 
 ### Execute workflow
 
 #### Original workflow
 
 Adjust input and output pathes to your needs.
-You will also need to adapt parallelization parameters in [force-l2ps-param.sh](https://github.com/CRC-FONDA/FORCE2NXF-Rangeland/blob/main/originalWF/force-l2ps-params.sh#L28-L30) and [force-hlps-param.sh](https://github.com/CRC-FONDA/FORCE2NXF-Rangeland/blob/main/originalWF/force-hlps-params.sh#L22-L24) to settings that will work on your machine.
+You will also need to adapt parallelization parameters in [force-l2ps-param.sh](originalWF/force-l2ps-params.sh#L28-L30) and [force-hlps-param.sh](originalWF/force-hlps-params.sh#L22-L24) to settings that will work on your machine.
 ```
 time originalWF/force-original.sh $PWD/inputdata $PWD/outputdata &> outputdata/stdout.log
 ```

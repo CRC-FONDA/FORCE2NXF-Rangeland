@@ -1,5 +1,7 @@
-.nextflow*
-**/.nextflow
+**/.nextflow/
+**.pdf
+**/.ipynb_checkpoints/
+experiment/plots/overleaf/
 **/work
 **/flowchart*
 **/report*
