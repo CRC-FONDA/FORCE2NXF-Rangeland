@@ -1,0 +1,141 @@
+<VRTDataset rasterXSize="32401" rasterYSize="10801">
+  <SRS dataAxisToSRSAxisMapping="2,1">GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],AUTHORITY["EPSG","4326"]]</SRS>
+  <GeoTransform>  2.0999861111111102e+01,  2.7777777777777794e-04,  0.0000000000000000e+00,  3.7000138888888898e+01,  0.0000000000000000e+00, -2.7777777777777794e-04</GeoTransform>
+  <VRTRasterBand dataType="Int16" band="1">
+    <Metadata>
+      <MDI key="STATISTICS_APPROXIMATE">YES</MDI>
+      <MDI key="STATISTICS_MAXIMUM">2356</MDI>
+      <MDI key="STATISTICS_MEAN">45.005916213885</MDI>
+      <MDI key="STATISTICS_MINIMUM">-27</MDI>
+      <MDI key="STATISTICS_STDDEV">220.29934988845</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">100</MDI>
+    </Metadata>
+    <ColorInterp>Gray</ColorInterp>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n36_e027_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="21600" yOff="0" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n34_e026_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="18000" yOff="7200" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n34_e023_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="7200" yOff="7200" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n36_e024_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="10800" yOff="0" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n36_e021_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n34_e025_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="14400" yOff="7200" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n36_e025_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="14400" yOff="0" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n36_e022_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="3600" yOff="0" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n36_e023_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="7200" yOff="0" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n35_e024_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="10800" yOff="3600" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n35_e025_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="14400" yOff="3600" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n35_e026_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="18000" yOff="3600" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n35_e027_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="21600" yOff="3600" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n36_e026_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="18000" yOff="0" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n36_e029_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="28800" yOff="0" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n35_e023_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="7200" yOff="3600" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n34_e024_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="10800" yOff="7200" xSize="3601" ySize="3601" />
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">srtm_aster/n36_e028_1arc_v3.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3601" RasterYSize="3601" DataType="Int16" BlockXSize="3601" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3601" ySize="3601" />
+      <DstRect xOff="25200" yOff="0" xSize="3601" ySize="3601" />
+    </SimpleSource>
+  </VRTRasterBand>
+</VRTDataset>
