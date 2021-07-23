@@ -26,7 +26,7 @@ To run in Docker:
 - [Docker](https://www.docker.com/) 
 
 
-### Download input data
+### Input data
 To execute both workflows, the following data are required ([filelist](experiment/filelist.txt)).
 Smaller datasets are already included in this repository:
 ```
@@ -55,16 +55,16 @@ rm wvp-global.tar.gz
 ```
 
 #### Area of interest (vector):
-FYI: The repository includes a geospatial vector dataset that holds the boundary of Crete, Greece, i.e., our study area.
+The repository includes a geospatial vector dataset that holds the boundary of Crete, Greece, i.e., our study area.
 
 #### Digital Elevation Model (dem):
-FYI: A DEM is necessary for topographic correction of Landsat data, and helps to distinguish between cloud shadows and water surfaces. This repository includes a 1 arcsecond DEM covering Crete. The DEM obtained by the Shuttle Radar Topography Mission (SRTM) is primarily used, but filled with the Advanced Spaceborne Thermal Emission and Reflection Radiometer (ASTER) DEM for areas not covered by the SRTM DEM. Data courtesy of the Ministry of Economy, Trade, and Industry (METI) of Japan and the United States National Aeronautics and Space Administration (NASA).
+A DEM is necessary for topographic correction of Landsat data, and helps to distinguish between cloud shadows and water surfaces. This repository includes a 1 arcsecond DEM covering Crete. The DEM obtained by the Shuttle Radar Topography Mission (SRTM) is primarily used, but filled with the Advanced Spaceborne Thermal Emission and Reflection Radiometer (ASTER) DEM for areas not covered by the SRTM DEM. Data courtesy of the Ministry of Economy, Trade, and Industry (METI) of Japan and the United States National Aeronautics and Space Administration (NASA).
 
 #### Endmember spectra (endmember):
-FYI: For unmixing satellite-observed reflectance into sub-pixel fractions of land surface components (e.g. photosynthetic active vegetation), endmember spectra are necessary. This repository includes four endmembers (photosynthetic active vegetation, soil, rock, photogrammetric shade) as used in [Hostert et al. 2003](https://www.sciencedirect.com/science/article/abs/pii/S0034425703001457).
+For unmixing satellite-observed reflectance into sub-pixel fractions of land surface components (e.g. photosynthetic active vegetation), endmember spectra are necessary. This repository includes four endmembers (photosynthetic active vegetation, soil, rock, photogrammetric shade) as used in [Hostert et al. 2003](https://www.sciencedirect.com/science/article/abs/pii/S0034425703001457).
 
 #### Datacube definition (grid):
-FYI: The file ``datacube-definition.prj`` is included in this repository, which stores information about the projection and reference grid of the generated datacube. For details see the [FORCE main paper](https://www.mdpi.com/2072-4292/11/9/1124).
+The file ``datacube-definition.prj`` is included in this repository, which stores information about the projection and reference grid of the generated datacube. For details see the [FORCE main paper](https://www.mdpi.com/2072-4292/11/9/1124).
 
 ### Execute workflow
 

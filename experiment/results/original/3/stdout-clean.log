@@ -1,0 +1,65 @@
+START: generate masks
+
+real	0m3,660s
+user	0m0,063s
+sys	0m0,105s
+
+
+START: tile allow-list
+
+real	0m2,854s
+user	0m0,050s
+sys	0m0,051s
+
+
+START: Level 2 Processing
+
+real	325m0,367s
+user	0m4,579s
+sys	0m3,437s
+
+
+START: Higher Level Processing
+________________________________________
+Progress:                        100.00%
+Time for I/C/O:           017%/060%/023%
+
+________________________________________
+Real time:       00y 00m 00d 00h 29m 04s
+Virtual time:    00y 00m 00d 00h 45m 41s
+Saved time:      00y 00m 00d 00h 16m 37s
+
+________________________________________
+Virtual I-time:  00y 00m 00d 00h 07m 52s
+Virtual C-time:  00y 00m 00d 00h 27m 21s
+Virtual O-time:  00y 00m 00d 00h 10m 28s
+
+________________________________________
+I-bound time:    00y 00m 00d 00h 00m 48s
+C-bound time:    00y 00m 00d 00h 16m 43s
+O-bound time:    00y 00m 00d 00h 00m 48s
+
+real	29m8,621s
+user	0m0,283s
+sys	0m0,147s
+
+
+
+START: mosaicking
+
+real	0m10,863s
+user	0m0,060s
+sys	0m0,051s
+
+
+START: pyramids
+
+real	0m46,970s
+user	0m0,120s
+sys	0m0,220s
+
+
+Total runtime:
+real    355m15,808s
+user    0m5,382s
+sys     0m4,238s
