@@ -7,9 +7,9 @@ experiment/plots/overleaf/
 **/report*
 outputdata/*
 inputdata/wvdb/*
-inputdata/download/180036/*
-inputdata/download/181035/*
-inputdata/download/181036/*
-inputdata/download/182035/*
-inputdata/download/182036/*
-inputdata/download/183035/*
+inputdata/download/data/180036/*
+inputdata/download/data/181035/*
+inputdata/download/data/181036/*
+inputdata/download/data/182035/*
+inputdata/download/data/182036/*
+inputdata/download/data/183035/*
