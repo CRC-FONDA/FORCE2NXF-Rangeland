@@ -5,7 +5,7 @@
 This repository focuses on a specific workflow to re-assess the widespread rangeland degradation in the Mediterranean as reported 20 years ago with limited input data. With the unlimited data access of today, however, we found that total vegetation on the island of Crete, Greece, did rather increase. Yet, we still cannot dispel that vegetation degradation occurred as most increase in vegetation cover was found in the woody vegetation, which potentially represents a degradation process related to the increase of impalatable species.
 
 This repository offers two implementations of the workflow. The [original one](originalWF/force-original.sh) in standalone FORCE and a [ported one](nextflowWF/workflow-dsl2.nf) in FORCE on Nextflow.
-We refer to the thematic workflow paper itself: [in preparation](abc), and [our paper](abc) comparing the different implementations. 
+We refer to the thematic workflow paper itself: [in preparation](abc), and [our paper](http://ceur-ws.org/Vol-3052/short12.pdf) comparing the different implementations. 
 
 <p align="center">
   <img src="DAG_both.jpg" width = "50%">
