@@ -39,9 +39,9 @@ For infos on Landsat, see [here](https://www.usgs.gov/core-science-systems/nli/l
 ```
 cd download
 mkdir -p meta
-force-level1-csd -u -s "LND04 LND05 LND07" meta
+force-level1-csd -u -s "LT04,LT05,LE07" meta
 mkdir -p data
-force-level1-csd -s "LND04 LND05 LND07" -d "19840101,20061231" -c 0,70 meta/ data/ queue.txt vector/aoi.gpkg
+force-level1-csd -s "LT04,LT05,LE07" -d "19840101,20061231" -c 0,70 meta/ data/ queue.txt vector/aoi.gpkg
 ```
 *For the original workflow, the file queue (``queue.txt``), needs to hold filenames relative to ``/data/input/``, which is the mountpoint of the ``inputdata`` directory within the Docker container (i.e., ``-v path-to-repo/inputdata:/data/input``);  [see this example](inputdata/download/data/queue.txt).*
 
