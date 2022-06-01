@@ -1,8 +1,9 @@
 nextflow.enable.dsl=2
+params.forceVer = "latest"
 
 process generateTileAllowList{
 
-    container 'davidfrantz/force'
+    container "davidfrantz/force:${params.forceVer}"
     memory { 500.MB * task.attempt }
     time { 3.minute * task.attempt }
 

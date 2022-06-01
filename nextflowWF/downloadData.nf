@@ -2,10 +2,11 @@ nextflow.enable.dsl=2
 
 params.downloadData = false
 params.sensors_level1 = "LT04,LT05,LE07,S2A"
+params.forceVer = "latest"
 
 process downloadData{
 
-    container 'davidfrantz/force'
+    container "davidfrantz/force:${params.forceVer}"
 
     when:
     params.downloadData

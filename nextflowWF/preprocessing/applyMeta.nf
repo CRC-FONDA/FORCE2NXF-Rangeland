@@ -1,10 +1,11 @@
 nextflow.enable.dsl=2
+params.forceVer = "latest"
 
 process applyMeta {
 
     tag { id }
 
-    container 'davidfrantz/force'
+    container "davidfrantz/force:${params.forceVer}"
 
     input:
     tuple val( id ), path( dst ), path( src )
