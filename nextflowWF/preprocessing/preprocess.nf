@@ -59,7 +59,7 @@ process preprocess {
     sed -i "/^DIR_LEVEL2 /c\\DIR_LEVEL2 = level2_ard/" \$PARAM
     sed -i "/^DIR_LOG /c\\DIR_LOG = level2_log/" \$PARAM
     sed -i "/^DIR_TEMP /c\\DIR_TEMP = level2_tmp/" \$PARAM
-    sed -i "/^FILE_DEM /c\\FILE_DEM = $dem/global_srtm-aster.vrt" \$PARAM
+    sed -i "/^FILE_DEM /c\\FILE_DEM = $dem/crete_srtm-aster.vrt" \$PARAM
     sed -i "/^DIR_WVPLUT /c\\DIR_WVPLUT = $wvdb" \$PARAM
     sed -i "/^FILE_TILE /c\\FILE_TILE = $tile" \$PARAM
     sed -i "/^TILE_SIZE /c\\TILE_SIZE = \$TILESIZE" \$PARAM
