@@ -27,7 +27,7 @@ To run in Docker:
 
 
 ### Input data
-For Kubernetes you can download the data manually, or run the [setup.sh](kubernetes/download/setup.sh) file. However, this will download a different dataset than initially used. Thus, the checkResults task in the workflow might fail.
+For Kubernetes you can download the data manually, or run the [setup.sh](kubernetes/download/setup.sh) file. However, this will download a different dataset than initially used. Thus, the checkResults task in the workflow might fail. In this case, you can call the workflow with `--skipCheckResults`.
 
 To execute both workflows, the following data are required ([filelist](experiment/filelist.txt)).
 Smaller datasets are already included in this repository:
