@@ -27,6 +27,8 @@ To run in Docker:
 
 
 ### Input data
+For Kubernetes you can download the data manually, or run the [setup.sh](kubernetes/download/setup.sh) file. However, this will download a different dataset than initially used. Thus, the checkResults task in the workflow might fail.
+
 To execute both workflows, the following data are required ([filelist](experiment/filelist.txt)).
 Smaller datasets are already included in this repository:
 ```
@@ -89,7 +91,7 @@ nextflow run workflow-dsl2.nf \
 -with-report ../outputdata/report.html
 ```
 ##### Kubernetes
-1. Setup a user role
+1. Setup a user role (Maybe change the namespace)
 ```
 kubectl -f kubernetes/nextflow-pod-role.yaml
 kubectl -f kubernetes/nextflow-role-binding.yaml
