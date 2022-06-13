@@ -21,6 +21,7 @@ params.useCPU = 2
 params.onlyTile = null
 params.groupSize = 100
 params.forceVer = "3.6.5"
+params.skipCheckResults = false
 
 def inRegion = input -> {
     Integer date = input.simpleName.split("_")[3] as Integer
@@ -47,6 +48,8 @@ workflow {
 
     groupedTrendData = higherLevel.out.trendFiles.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
 
-    checkResults( groupedTrendData, file( "${moduleDir}/checkData/reference.RData" ) )
+    if ( !params.skipCheckResults ) {
+        checkResults( groupedTrendData, file( "${moduleDir}/checkData/reference.RData" ) )
+    }
 
 }
