@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ceph-rangeland-data
+spec:
+  storageClassName: cephfs
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 600G
