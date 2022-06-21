@@ -5,6 +5,11 @@ end="20061231"
 kubectl apply -f ceph-rangeland-input.yaml
 kubectl apply -f ceph-rangeland-data.yaml
 
+# Create Nextflow roles
+kubectl apply -f roles/pod-role.yaml
+kubectl apply -f roles/role-binding.yaml
+kubectl apply -f roles/serviceAccount.yaml
+
 cat >download.sh <<EOL
 gsutil config -r
 git clone https://github.com/CRC-FONDA/FORCE2NXF-Rangeland.git

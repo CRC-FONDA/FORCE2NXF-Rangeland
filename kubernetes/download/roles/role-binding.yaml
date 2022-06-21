@@ -1,0 +1,13 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+   name: nextflow-pod-role-binding
+   namespace: flehmann
+subjects:
+ - kind: ServiceAccount
+   name: nextflow
+   namespace: flehmann
+roleRef:
+   kind: ClusterRole
+   name: nextflow-pod-role
+   apiGroup: rbac.authorization.k8s.io
