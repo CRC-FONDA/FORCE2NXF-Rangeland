@@ -3,7 +3,6 @@ kind: Pod
 metadata:
   name: download-pod
 spec:
-  nodeName: wally176
   containers:
   - name: download
     image: davidfrantz/force
