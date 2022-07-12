@@ -8,7 +8,7 @@ process processPyramid{
     tag { product }
     publishDir "${params.outdata}/trend/pyramid/$product/trend/${image.simpleName.substring(0,11)}/", mode:'copy'
     container "davidfrantz/force:${params.forceVer}"
-    memory { 1500.MB * task.attempt }
+    memory { 2200.MB * task.attempt }
     time { 3.minute * task.attempt }
     stageInMode 'copy'
 

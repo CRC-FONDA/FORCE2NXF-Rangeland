@@ -17,7 +17,7 @@ process processHigherLevel{
     maxRetries 5
 
     cpus params.useCPU * 2
-    memory { (params.onlyTile ? 12000.MB : 3300.MB ) * task.attempt }
+    memory { (params.onlyTile ? 12000.MB : 3500.MB ) * task.attempt }
     time { 60.minute * task.attempt }
 
     input:
