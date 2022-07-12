@@ -10,8 +10,8 @@ process preprocess {
 
     container "davidfrantz/force:${params.forceVer}"
 
-    publishDir "${params.outdata}/preprocess_logs", mode: 'copy', pattern: '**.log'
-    publishDir "${params.outdata}/preprocess_prm", mode: 'copy', pattern: '**.prm'
+    //publishDir "${params.outdata}/preprocess_logs", mode: 'copy', pattern: '**.log'
+    //publishDir "${params.outdata}/preprocess_prm", mode: 'copy', pattern: '**.prm'
 
     errorStrategy 'retry'
     maxRetries 5

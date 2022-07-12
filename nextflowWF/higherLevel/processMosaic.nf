@@ -9,7 +9,7 @@ process processMosaic{
     container "davidfrantz/force:${params.forceVer}"
     memory { 1500.MB * task.attempt }
     time { 3.minute * task.attempt }
-    publishDir "${params.outdata}/trend/mosaic/$product", mode:'copy'
+    //publishDir "${params.outdata}/trend/mosaic/$product", mode:'copy'
 
     input:
     tuple val( product ), path('trend/*')
