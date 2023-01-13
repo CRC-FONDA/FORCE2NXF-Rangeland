@@ -29,8 +29,7 @@ workflow higherLevel {
         trendFilesMosaic = trendFiles.groupTuple()
         
         processMosaic( trendFilesMosaic, cubeFile )
-
-        processPyramid( trendFiles.filter { it[1].name.endsWith('.tif')  } )
+        processPyramid( trendFiles.filter { it[1].name.endsWith('.tif')  }.map { [ it[1].simpleName.substring(0,11), it[1] ] } .groupTuple() )
 
     emit:
         trendFiles = processMosaic.out.trendFiles

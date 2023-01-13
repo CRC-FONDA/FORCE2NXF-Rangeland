@@ -3,23 +3,27 @@ nextflow.enable.dsl=2
 params.outdata = ""
 params.forceVer = "latest"
 
-process processPyramid{
+process processPyramid {
 
-    tag { product }
-    publishDir "${params.outdata}/trend/pyramid/$product/trend/${image.simpleName.substring(0,11)}/", mode:'copy'
+    tag { tile }
+    publishDir "${params.outdata}/trend/pyramid/", saveAs: {"${it.substring(12,it.indexOf("."))}/trend/${it.substring(0,11)}/$it"}, mode:'copy'
     container "davidfrantz/force:${params.forceVer}"
     memory { 1500.MB * task.attempt }
     time { 3.minute * task.attempt }
     stageInMode 'copy'
 
     input:
-    tuple val( product ), path( image )
+    tuple val( tile ), path( image )
     
     output:
     path( '**' ), emit: trends
 
     """
-    force-pyramid $image
+    files="*.tif"
+    for file in \$files; do
+        force-pyramid \$file
+    done
+    ls -la
     """
 
 }
