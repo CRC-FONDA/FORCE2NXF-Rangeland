@@ -19,9 +19,13 @@ process merge {
     """
 
     files=`find -L input/ -type f -printf "%f\\n" | sort | uniq`
+    numberFiles=`echo \$files | wc -w`
+    currentFile=0
 
     for file in \$files
     do
+        currentFile=\$((currentFile+1))
+        echo "Merging \$file (\$currentFile of \$numberFiles)"
         
         onefile=`ls -- */*/\${file} | head -1`
         
