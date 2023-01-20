@@ -43,9 +43,15 @@ workflow preprocessing {
         //Find tiles to merge
         boaTilesToMerge = boaTiles.filter{ x -> x[1].size() > 1 }
                                 .map{ [ it[0].substring( 0, 11 ), it[1] ] }
+                                //Sort to ensure the same groups if you use resume
+                                .toSortedList{ a,b -> a[1][0].simpleName <=> b[1][0].simpleName }
+                                .flatMap{it}
                                 .groupTuple( remainder : true, size : params.groupSize ).map{ [ it[0], it[1] .flatten() ] }
         qaiTilesToMerge = qaiTiles.filter{ x -> x[1].size() > 1 }
                                 .map{ [ it[0].substring( 0, 11 ), it[1] ] }
+                                //Sort to ensure the same groups if you use resume
+                                .toSortedList{ a,b -> a[1][0].simpleName <=> b[1][0].simpleName }
+                                .flatMap{it}
                                 .groupTuple( remainder : true, size : params.groupSize ).map{ [ it[0], it[1] .flatten() ] }
 
         //Find tiles with only one file
