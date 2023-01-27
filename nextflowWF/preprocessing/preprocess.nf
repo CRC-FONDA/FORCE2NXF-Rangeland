@@ -1,7 +1,6 @@
 nextflow.enable.dsl=2
 
 params.outdata = ""
-params.useCPU = 2
 params.forceVer = "latest"
 
 process preprocess {
@@ -15,10 +14,6 @@ process preprocess {
 
     errorStrategy 'retry'
     maxRetries 5
-
-    cpus params.useCPU
-    memory { 4500.MB * task.attempt }
-    time { 20.minute * task.attempt }
 
     input:
     path data

@@ -11,7 +11,6 @@ include { applyMeta as applyMetaBOA; applyMeta as applyMetaQAI } from './applyMe
 def extractDirectory = { it.parent.toString().substring(it.parent.toString().lastIndexOf('/') + 1 ) }
 
 params.outdata = ""
-params.useCPU = 2
 params.resolution = 30
 //Number of images to merge in one process
 params.groupSize = 100

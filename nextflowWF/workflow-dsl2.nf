@@ -17,7 +17,6 @@ params.startdate = "1984-01-01"
 params.enddate = "2006-12-31"
 timeRange = "${params.startdate.replace('-', '')},${params.enddate.replace('-', '')}"
 params.resolution = 30
-params.useCPU = 2
 params.onlyTile = null
 params.groupSize = 100
 params.forceVer = "3.6.5"

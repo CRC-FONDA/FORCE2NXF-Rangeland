@@ -8,8 +8,6 @@ process processPyramid {
     tag { tile }
     publishDir "${params.outdata}/trend/pyramid/", saveAs: {"${it.substring(12,it.indexOf("."))}/trend/${it.substring(0,11)}/$it"}, mode:'copy'
     container "davidfrantz/force:${params.forceVer}"
-    memory { 1500.MB * task.attempt }
-    time { 3.minute * task.attempt }
     stageInMode 'copy'
 
     input:

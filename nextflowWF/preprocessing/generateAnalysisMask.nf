@@ -6,8 +6,6 @@ params.forceVer = "latest"
 process generateAnalysisMask{
 
     container "davidfrantz/force:${params.forceVer}"
-    memory { 500.MB * task.attempt }
-    time { 3.minute * task.attempt }
 
     input:
     path aoi
