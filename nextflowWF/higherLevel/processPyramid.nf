@@ -6,7 +6,7 @@ params.forceVer = "latest"
 process processPyramid {
 
     tag { tile }
-    publishDir "${params.outdata}/trend/pyramid/", saveAs: {"${it.substring(12,it.indexOf("."))}/trend/${it.substring(0,11)}/$it"}, mode:'copy'
+    publishDir "${params.outdata}/trend/pyramid/", saveAs: {"${it.substring(12,it.indexOf("."))}/trend/${it.substring(0,11)}/$it"}, mode:'copy', enabled: params.publish
     container "davidfrantz/force:${params.forceVer}"
     stageInMode 'copy'
 
