@@ -2,6 +2,8 @@ nextflow.enable.dsl=2
 
 process checkResults {
 
+    //Only retry if OutOfMemoryError
+    errorStrategy = { task.exitStatus == 143 ? 'retry' : 'ignore' }
     container 'rocker/geospatial:3.6.3'
 
     input:
