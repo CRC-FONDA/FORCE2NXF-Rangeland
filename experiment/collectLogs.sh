@@ -1,1 +1,0 @@
-find /workdir/work/ -name '.command.*' -print0 | tar -cvjf /workdir/output/logs.tar.bz2 --null --files-from -
