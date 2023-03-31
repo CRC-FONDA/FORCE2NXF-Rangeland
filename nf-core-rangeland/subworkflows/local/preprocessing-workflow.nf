@@ -1,11 +1,11 @@
 nextflow.enable.dsl=2
 
 //includes
-include { generateTileAllowList } from './generateTileAllowList'
-include { generateAnalysisMask } from './generateAnalysisMask'
-include { preprocess } from './preprocess'
-include { merge as mergeBOA; merge as mergeQAI } from './merge'
-include { applyMeta as applyMetaBOA; applyMeta as applyMetaQAI } from './applyMeta'
+include { generateTileAllowList } from '../../modules/local/generateTileAllowList'
+include { generateAnalysisMask } from '../../modules/local/generateAnalysisMask'
+include { preprocess } from '../../modules/local/preprocess'
+include { merge as mergeBOA; merge as mergeQAI } from '../../modules/local/merge'
+include { applyMeta as applyMetaBOA; applyMeta as applyMetaQAI } from '../../modules/local/applyMeta'
 
 //Closure to extract the parent directory of a file
 def extractDirectory = { it.parent.toString().substring(it.parent.toString().lastIndexOf('/') + 1 ) }
@@ -18,7 +18,7 @@ params.forceVer = "latest"
 
 workflow preprocessing {
 
-    take: 
+    take:
         data
         dem
         wvdb
@@ -29,10 +29,10 @@ workflow preprocessing {
 
         generateTileAllowList( aoiFile, cubeFile )
         generateAnalysisMask( aoiFile, cubeFile )
-        
+
         //Group masks by tile
         masks = generateAnalysisMask.out.masks.flatten().map{ x -> [ extractDirectory(x), x ] }
-        
+
         preprocess( data, cubeFile, generateTileAllowList.out.tileAllow, dem, wvdb )
 
         //Group by tile, date and sensor
@@ -57,8 +57,8 @@ workflow preprocessing {
         boaTilesDone = boaTiles.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0] .substring( 0, 11 ), x[1][0] ] }
         qaiTilesDone = qaiTiles.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0] .substring( 0, 11 ), x[1][0] ] }
 
-        mergeBOA( file("${moduleDir}/bin/merge-boa.r"), boaTilesToMerge, cubeFile )
-        mergeQAI( file("${moduleDir}/bin/merge-qai.r"), qaiTilesToMerge, cubeFile )
+        mergeBOA( file("merge-boa.r"), boaTilesToMerge, cubeFile )
+        mergeQAI( file("merge-qai.r"), qaiTilesToMerge, cubeFile )
 
         //Concat merged list with single images, group by tile over time
         boaTiles = mergeBOA.out.tilesMerged
@@ -67,8 +67,8 @@ workflow preprocessing {
         qaiTiles = mergeQAI.out.tilesMerged
                         .concat( qaiTilesDone ).groupTuple()
                         .map { [it[0], it[1].flatten() ] }
-    
+
     emit:
         tilesAndMasks = boaTiles.join( qaiTiles ).join( masks )
-        
+
 }

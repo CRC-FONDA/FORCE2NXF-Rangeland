@@ -1,9 +1,9 @@
 nextflow.enable.dsl=2
 
 //inputs
-include { processHigherLevel } from './processHigherLevel.nf'
-include { processMosaic } from './processMosaic.nf'
-include { processPyramid } from './processPyramid.nf'
+include { processHigherLevel } from '../../modules/local/processHigherLevel.nf'
+include { processMosaic } from '../../modules/local/processMosaic.nf'
+include { processPyramid } from '../../modules/local/processPyramid.nf'
 
 params.outdata = ""
 params.sensors_level2 = "LND04 LND05 LND07"
@@ -16,7 +16,7 @@ params.forceVer = "latest"
 
 workflow higherLevel {
 
-    take: 
+    take:
         tilesAndMasks
         cubeFile
         endmemberFile
@@ -27,7 +27,7 @@ workflow higherLevel {
         trendFiles = processHigherLevel.out.trendFiles.flatten().map{ x -> [ x.simpleName.substring(12), x ] }
 
         trendFilesMosaic = trendFiles.groupTuple()
-        
+
         processMosaic( trendFilesMosaic, cubeFile )
         processPyramid( trendFiles.filter { it[1].name.endsWith('.tif')  }.map { [ it[1].simpleName.substring(0,11), it[1] ] } .groupTuple() )
 

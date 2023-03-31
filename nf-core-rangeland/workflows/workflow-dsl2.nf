@@ -3,10 +3,9 @@
 
 nextflow.enable.dsl=2
 
-include { downloadAuxiliary } from './downloadAuxiliary'
-include { checkResults } from './checkResults'
-include { preprocessing } from './preprocessing/preprocessing-workflow'
-include { higherLevel } from './higherLevel/higherLevel-workflow'
+include { checkResults } from '../modules/local/checkResults'
+include { preprocessing } from '../subworkflows/local/preprocessing-workflow'
+include { higherLevel } from '../subworkflows/local/higherLevel-workflow'
 
 params.inputdata = ""
 params.outdata = ""
@@ -40,7 +39,7 @@ workflow {
     endmemberFile = file( "${params.inputdata}/endmember/hostert-2003.txt" )
 
     preprocessing(data, dem, wvdb, cubeFile, aoiFile)
-    
+
     preprocessedData = preprocessing.out.tilesAndMasks.filter { params.onlyTile ? it[0] == params.onlyTile : true }
 
     higherLevel( preprocessedData, cubeFile, endmemberFile )
@@ -48,7 +47,7 @@ workflow {
     groupedTrendData = higherLevel.out.trendFiles.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
 
     if ( !params.skipCheckResults ) {
-        checkResults( groupedTrendData, file( "${moduleDir}/checkData/reference.RData" ) )
+        checkResults( groupedTrendData, file( "../assets/reference.RData" ) )
     }
 
 }
