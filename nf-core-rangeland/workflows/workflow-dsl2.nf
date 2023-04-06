@@ -7,9 +7,8 @@ include { checkResults } from '../modules/local/checkResults'
 include { preprocessing } from '../subworkflows/local/preprocessing-workflow'
 include { higherLevel } from '../subworkflows/local/higherLevel-workflow'
 
-params.inputdata = ""
 params.outdata = ""
-println("input data path: '$params.inputdata'")
+println("input data path: '$params.data'")
 
 params.sensors_level2 = "LND04 LND05 LND07"
 params.startdate = "1984-01-01"
@@ -30,13 +29,13 @@ def inRegion = input -> {
 
 workflow {
 
-    data = Channel.fromPath( "${params.inputdata}/download/data/*/*", type: 'dir') .flatten()
+    data = Channel.fromPath( "${params.data}/*/*", type: 'dir') .flatten()
     data = data.flatten().filter{ inRegion(it) }
-    dem = file( params.inputdata + '/dem/')
-    wvdb = file( params.inputdata + '/wvdb/')
-    cubeFile = file( "${params.inputdata}/grid/datacube-definition.prj" )
-    aoiFile = file( "${params.inputdata}/vector/aoi.gpkg" )
-    endmemberFile = file( "${params.inputdata}/endmember/hostert-2003.txt" )
+    dem = file( "$params.dem")
+    wvdb = file( "$params.wvdb")
+    cubeFile = file( "$params.data_cube" )
+    aoiFile = file( "$params.aoi" )
+    endmemberFile = file( "$params.endmember" )
 
     preprocessing(data, dem, wvdb, cubeFile, aoiFile)
 
