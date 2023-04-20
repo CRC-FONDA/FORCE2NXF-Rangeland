@@ -1,11 +1,11 @@
 //RUN:
 //nextflow run workflow-dsl2.nf -with-report report.html -with-dag flowchart.html --outdata="/home/ubuntu/data/data/outputs/" --inputdata="/home/ubuntu/data/data/inputs/" -bg  > log.log
 
-nextflow.enable.dsl=2
+nextflow.enable.dsl = 2
 
 include { checkResults } from '../modules/local/checkResults'
 include { preprocessing } from '../subworkflows/local/preprocessing-workflow'
-include { higherLevel } from '../subworkflows/local/higherLevel-workflow'
+include { HIGHER_LEVEL } from '../subworkflows/local/higher_level'
 
 params.outdata = ""
 println("input data path: '$params.data'")
@@ -41,9 +41,9 @@ workflow {
 
     preprocessedData = preprocessing.out.tilesAndMasks.filter { params.onlyTile ? it[0] == params.onlyTile : true }
 
-    higherLevel( preprocessedData, cubeFile, endmemberFile )
+    HIGHER_LEVEL( preprocessedData, cubeFile, endmemberFile )
 
-    groupedTrendData = higherLevel.out.trendFiles.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
+    groupedTrendData = HIGHER_LEVEL.out.trend_files.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
 
     if ( !params.skipCheckResults ) {
         checkResults( groupedTrendData, file( "../assets/reference.RData" ) )

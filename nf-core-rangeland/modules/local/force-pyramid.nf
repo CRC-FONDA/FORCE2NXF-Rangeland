@@ -1,9 +1,9 @@
-nextflow.enable.dsl=2
+nextflow.enable.dsl = 2
 
 params.outdata = ""
 params.forceVer = "latest"
 
-process processPyramid {
+process FORCE_PYRAMID {
 
     tag { tile }
     publishDir "${params.outdata}/trend/pyramid/", saveAs: {"${it.substring(12,it.indexOf("."))}/trend/${it.substring(0,11)}/$it"}, mode:'copy', enabled: params.publish
@@ -12,7 +12,7 @@ process processPyramid {
 
     input:
     tuple val( tile ), path( image )
-    
+
     output:
     path( '**' ), emit: trends
 

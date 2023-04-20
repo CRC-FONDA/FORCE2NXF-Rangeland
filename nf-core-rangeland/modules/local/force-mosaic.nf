@@ -1,9 +1,9 @@
-nextflow.enable.dsl=2
+nextflow.enable.dsl = 2
 
 params.outdata = ""
 params.forceVer = "latest"
 
-process processMosaic{
+process FORCE_MOSAIC{
 
     tag { product }
     container "davidfrantz/force:${params.forceVer}"
@@ -13,7 +13,7 @@ process processMosaic{
     tuple val( product ), path('trend/*')
     path 'trend/datacube-definition.prj'
     output:
-    tuple val( product ), path( 'trend/*' ), emit: trendFiles
+    tuple val( product ), path( 'trend/*' ), emit: trend_files
 
     """
     #Move files from trend/<Tile>_<Filename> to trend/<Tile>/<Filename>
@@ -22,7 +22,7 @@ process processMosaic{
         mkdir -p \${path%_$product*}
         mv \$path \${path%_$product*}/${product}.\${path#*.}
     done;
-    
+
     force-mosaic trend/
     """
 
