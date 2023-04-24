@@ -3,7 +3,7 @@
 
 nextflow.enable.dsl = 2
 
-include { checkResults } from '../modules/local/checkResults'
+include { CHECK_RESULTS } from '../modules/local/check_results'
 include { preprocessing } from '../subworkflows/local/preprocessing-workflow'
 include { HIGHER_LEVEL } from '../subworkflows/local/higher_level'
 
@@ -43,10 +43,10 @@ workflow {
 
     HIGHER_LEVEL( preprocessedData, cubeFile, endmemberFile )
 
-    groupedTrendData = HIGHER_LEVEL.out.trend_files.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
+    grouped_trend_data = HIGHER_LEVEL.out.trend_files.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
 
     if ( !params.skipCheckResults ) {
-        checkResults( groupedTrendData, file( "../assets/reference.RData" ) )
+        CHECK_RESULTS( grouped_trend_data, file( "../assets/reference.RData" ) )
     }
 
 }

@@ -1,6 +1,6 @@
 nextflow.enable.dsl=2
 
-process checkResults {
+process CHECK_RESULTS {
 
     //Only retry if OutOfMemoryError
     errorStrategy = { task.exitStatus == 143 ? 'retry' : 'ignore' }
@@ -9,7 +9,7 @@ process checkResults {
     input:
     file{ "trend/?/*" }
     file( reference )
- 
+
     """
     files=`find ./trend/ -maxdepth 1 -mindepth 1 -type d`
     for path in \$files; do
