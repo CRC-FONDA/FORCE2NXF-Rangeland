@@ -1,4 +1,4 @@
-nextflow.enanle.dsl = 2
+nextflow.enable.dsl = 2
 
 params.forceVer = "latest"
 params.resolution = 30
