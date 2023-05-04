@@ -1,9 +1,9 @@
-nextflow.enable.dsl=2
+nextflow.enable.dsl = 2
 
 params.resolution = 30
 params.forceVer = "latest"
 
-process generateAnalysisMask{
+process FORCE_GENERATE_ANALYSIS_MASK{
 
     container "davidfrantz/force:${params.forceVer}"
 

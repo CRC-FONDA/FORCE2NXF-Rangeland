@@ -4,7 +4,7 @@
 nextflow.enable.dsl = 2
 
 include { CHECK_RESULTS } from '../modules/local/check_results'
-include { preprocessing } from '../subworkflows/local/preprocessing-workflow'
+include { PREPROCESSING } from '../subworkflows/local/preprocessing'
 include { HIGHER_LEVEL } from '../subworkflows/local/higher_level'
 
 params.outdata = ""
@@ -37,9 +37,9 @@ workflow {
     aoiFile = file( "$params.aoi" )
     endmemberFile = file( "$params.endmember" )
 
-    preprocessing(data, dem, wvdb, cubeFile, aoiFile)
+    PREPROCESSING(data, dem, wvdb, cubeFile, aoiFile)
 
-    preprocessedData = preprocessing.out.tilesAndMasks.filter { params.onlyTile ? it[0] == params.onlyTile : true }
+    preprocessedData = PREPROCESSING.out.tiles_and_masks.filter { params.onlyTile ? it[0] == params.onlyTile : true }
 
     HIGHER_LEVEL( preprocessedData, cubeFile, endmemberFile )
 

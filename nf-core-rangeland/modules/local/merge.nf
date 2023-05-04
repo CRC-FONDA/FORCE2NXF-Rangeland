@@ -1,6 +1,6 @@
 nextflow.enable.dsl=2
 
-process merge {
+process MERGE {
 
     tag { id }
 
@@ -12,7 +12,7 @@ process merge {
     path cube
 
     output:
-    tuple val( id ), path( "*.tif" ), emit: tilesMerged
+    tuple val( id ), path( "*.tif" ), emit: tiles_merged
 
     """
 
@@ -24,9 +24,9 @@ process merge {
     do
         currentFile=\$((currentFile+1))
         echo "Merging \$file (\$currentFile of \$numberFiles)"
-        
+
         onefile=`ls -- */*/\${file} | head -1`
-        
+
         #merge together
         matchingFiles=`ls -- */*/\${file}`
         ./merge.r \$file \${matchingFiles}

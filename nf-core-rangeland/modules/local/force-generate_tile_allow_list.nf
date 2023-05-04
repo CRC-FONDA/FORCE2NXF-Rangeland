@@ -1,7 +1,7 @@
-nextflow.enable.dsl=2
+nextflow.enable.dsl = 2
 params.forceVer = "latest"
 
-process generateTileAllowList{
+process FORCE_GENERATE_TILE_ALLOW_LIST{
 
     container "davidfrantz/force:${params.forceVer}"
 
@@ -11,10 +11,10 @@ process generateTileAllowList{
 
     output:
     //Tile allow for this image
-    path 'tileAllow.txt', emit: tileAllow
+    path 'tile_allow.txt', emit: tile_allow
 
     """
-    force-tile-extent $aoi tmp/ tileAllow.txt
+    force-tile-extent $aoi tmp/ tile_allow.txt
     rm -r tmp
     """
 
