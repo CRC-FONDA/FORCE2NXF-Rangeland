@@ -1,9 +1,8 @@
 nextflow.enable.dsl = 2
-params.forceVer = "latest"
 
 process FORCE_GENERATE_TILE_ALLOW_LIST{
 
-    container "davidfrantz/force:${params.forceVer}"
+    container "davidfrantz/force:${params.force_version}"
 
     input:
     path aoi

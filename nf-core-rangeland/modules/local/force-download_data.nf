@@ -1,11 +1,7 @@
 nextflow.enable.dsl = 2
 
-params.sensors_level1 = "LT04,LT05,LE07,S2A"
-params.forceVer = "latest"
-
 process FORCE-DOWNLOAD_DATA {
-
-    container "davidfrantz/force:${params.forceVer}"
+    container "davidfrantz/force:${params.force_version}"
 
     input:
     path aoi

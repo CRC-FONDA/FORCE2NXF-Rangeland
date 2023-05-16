@@ -6,15 +6,6 @@ include { FORCE_HIGHER_LEVEL } from '../../modules/local/force-higher_level.nf'
 include { FORCE_MOSAIC } from '../../modules/local/force-mosaic.nf'
 include { FORCE_PYRAMID } from '../../modules/local/force-pyramid.nf'
 
-params.outdata = ""
-params.sensors_level2 = "LND04 LND05 LND07"
-params.startdate = "1984-01-01"
-params.enddate = "2006-12-31"
-params.resolution = 30
-params.useCPU = 2
-params.onlyTile = null
-params.forceVer = "latest"
-
 workflow HIGHER_LEVEL {
 
     take:

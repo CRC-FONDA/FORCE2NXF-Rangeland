@@ -1,16 +1,18 @@
 nextflow.enable.dsl=2
 
-params.outdata = ""
-params.forceVer = "latest"
+// currently unused, kept for reference
+
+params.outdir = ""
+params.force_version = "latest"
 
 process preprocess {
 
     tag { data.simpleName }
 
-    container "davidfrantz/force:${params.forceVer}"
+    container "davidfrantz/force:${params.force_version}"
 
-    publishDir "${params.outdata}/preprocess_logs", mode: 'copy', pattern: '**.log', enabled: params.publish
-    publishDir "${params.outdata}/preprocess_prm", mode: 'copy', pattern: '**.prm', enabled: params.publish
+    publishDir "${params.outdir}/preprocess_logs", mode: 'copy', pattern: '**.log', enabled: params.publish
+    publishDir "${params.outdir}/preprocess_prm", mode: 'copy', pattern: '**.prm', enabled: params.publish
 
     errorStrategy 'retry'
     maxRetries 5
@@ -62,7 +64,7 @@ process preprocess {
     sed -i "/^ORIGIN_LON /c\\ORIGIN_LON = \$ORIGINX" \$PARAM
     sed -i "/^ORIGIN_LAT /c\\ORIGIN_LAT = \$ORIGINY" \$PARAM
     sed -i "/^PROJECTION /c\\PROJECTION = \$CRS" \$PARAM
-    sed -i "/^NTHREAD /c\\NTHREAD = $params.useCPU" \$PARAM
+    sed -i "/^NTHREAD /c\\NTHREAD = $params.force_cpu" \$PARAM
 
     # preprocess
     force-l2ps \$FILEPATH \$PARAM > level2_log/\$BASE.log            ### added a properly named logfile, we can make some tests based on this (probably in a different process?)

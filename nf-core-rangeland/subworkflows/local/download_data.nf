@@ -2,9 +2,6 @@ include { ARIA2               } from '../../modules/nf-core/aria2/main'
 include { UNTAR               } from '../../modules/nf-core/untar/main'
 include { FORCE-DOWNLOAD_DATA } from '../../modules/local/force-download_data'
 
-params.downloadData = true
-params.water_vapor_url = "https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1"
-
 workflow DOWNLOAD_DATA {
     take:
     aoi         //   file: /path/to/aoi.gpkg"

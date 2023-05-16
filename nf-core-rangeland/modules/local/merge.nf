@@ -1,4 +1,6 @@
-nextflow.enable.dsl=2
+nextflow.enable.dsl = 2
+
+// currently unused, kept for reference
 
 process MERGE {
 

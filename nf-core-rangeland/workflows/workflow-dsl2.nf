@@ -5,25 +5,16 @@ nextflow.enable.dsl = 2
 
 include { CHECK_RESULTS } from '../modules/local/check_results'
 include { PREPROCESSING } from '../subworkflows/local/preprocessing'
-include { HIGHER_LEVEL } from '../subworkflows/local/higher_level'
+include { HIGHER_LEVEL }  from '../subworkflows/local/higher_level'
 
-params.outdata = ""
 println("input data path: '$params.data'")
 
-params.sensors_level2 = "LND04 LND05 LND07"
-params.startdate = "1984-01-01"
-params.enddate = "2006-12-31"
-timeRange = "${params.startdate.replace('-', '')},${params.enddate.replace('-', '')}"
-params.resolution = 30
-params.onlyTile = null
-params.groupSize = 100
-params.forceVer = "3.6.5"
-params.skipCheckResults = false
+time_range = "${params.start_date.replace('-', '')},${params.end_date.replace('-', '')}"
 
 def inRegion = input -> {
     Integer date = input.simpleName.split("_")[3] as Integer
-    Integer start = params.startdate.replace('-','') as Integer
-    Integer end = params.enddate.replace('-','') as Integer
+    Integer start = params.start_date.replace('-','') as Integer
+    Integer end = params.end_date.replace('-','') as Integer
     return date >= start && date <= end
 }
 
@@ -33,19 +24,19 @@ workflow {
     data = data.flatten().filter{ inRegion(it) }
     dem = file( "$params.dem")
     wvdb = file( "$params.wvdb")
-    cubeFile = file( "$params.data_cube" )
-    aoiFile = file( "$params.aoi" )
-    endmemberFile = file( "$params.endmember" )
+    cube_file = file( "$params.data_cube" )
+    aoi_file = file( "$params.aoi" )
+    endmember_file = file( "$params.endmember" )
 
-    PREPROCESSING(data, dem, wvdb, cubeFile, aoiFile)
+    PREPROCESSING(data, dem, wvdb, cube_file, aoi_file)
 
-    preprocessedData = PREPROCESSING.out.tiles_and_masks.filter { params.onlyTile ? it[0] == params.onlyTile : true }
+    preprocessed_data = PREPROCESSING.out.tiles_and_masks.filter { params.only_tile ? it[0] == params.only_tile : true }
 
-    HIGHER_LEVEL( preprocessedData, cubeFile, endmemberFile )
+    HIGHER_LEVEL( preprocessed_data, cube_file, endmember_file )
 
     grouped_trend_data = HIGHER_LEVEL.out.trend_files.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
 
-    if ( !params.skipCheckResults ) {
+    if ( !params.skip_result_checking ) {
         CHECK_RESULTS( grouped_trend_data, file( "../assets/reference.RData" ) )
     }
 

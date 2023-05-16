@@ -1,20 +1,10 @@
 nextflow.enable.dsl = 2
 
-params.outdata = ""
-params.forceVer = "latest"
-
 process PREPROCESS_CONFIG {
-
-    debug TRUE
 
     tag { data.simpleName }
 
-    container "davidfrantz/force:${params.forceVer}"
-
-    publishDir "${params.outdata}/preprocess_prm", mode: 'copy', pattern: '*.prm', enabled: params.publish
-
-    errorStrategy 'retry'
-    maxRetries 5
+    container "davidfrantz/force:${params.force_version}"
 
     input:
     path data
@@ -53,7 +43,7 @@ process PREPROCESS_CONFIG {
     sed -i "/^ORIGIN_LON /c\\ORIGIN_LON = \$ORIGINX" \$PARAM
     sed -i "/^ORIGIN_LAT /c\\ORIGIN_LAT = \$ORIGINY" \$PARAM
     sed -i "/^PROJECTION /c\\PROJECTION = \$CRS" \$PARAM
-    sed -i "/^NTHREAD /c\\NTHREAD = $params.useCPU" \$PARAM
+    sed -i "/^NTHREAD /c\\NTHREAD = $params.force_cpu" \$PARAM
     """
 
 }

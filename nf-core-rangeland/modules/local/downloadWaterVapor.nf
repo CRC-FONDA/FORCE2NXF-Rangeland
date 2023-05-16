@@ -1,10 +1,9 @@
 nextflow.enable.dsl=2
-params.forceVer = "latest"
 
 process downloadWaterVapor{
 
     //Has to be downloaded anyways, so we can use it only for wget
-    container "davidfrantz/force:${params.forceVer}"
+    container "davidfrantz/force:${params.force_version}"
 
     output:
     file 'wvdb/', emit: wvdbFiles

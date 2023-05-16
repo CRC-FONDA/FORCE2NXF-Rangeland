@@ -1,18 +1,9 @@
 nextflow.enable.dsl=2
 
-params.outdata = ""
-params.forceVer = "latest"
-
 process FORCE_PREPROCESS {
     tag { data.simpleName }
 
-    container "davidfrantz/force:${params.forceVer}"
-
-    publishDir "${params.outdata}/preprocess_logs", mode: 'copy', pattern: '*.log', enabled: params.publish
-
-
-    errorStrategy 'retry'
-    maxRetries 5
+    container "davidfrantz/force:${params.force_version}"
 
     input:
     tuple path(conf), path(data)

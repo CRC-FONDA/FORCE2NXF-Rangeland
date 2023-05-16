@@ -1,17 +1,8 @@
 nextflow.enable.dsl = 2
 
-params.forceVer = "latest"
-params.resolution = 30
-params.useCPU = 2
-params.sensors_level2 = "LND04 LND05 LND07"
-params.startdate = "1984-01-01"
-params.enddate = "2006-12-31"
-params.onlyTile = null
-
-
 process HIGHER_LEVEL_CONFIG {
 
-    container "davidfrantz/force:${params.forceVer}"
+    container "davidfrantz/force:${params.force_version}"
     tag { tile }
 
     input:
@@ -39,7 +30,7 @@ process HIGHER_LEVEL_CONFIG {
 
     # threading
     sed -i "/^NTHREAD_READ /c\\NTHREAD_READ = 1" \$PARAM              # might need some modification
-    sed -i "/^NTHREAD_COMPUTE /c\\NTHREAD_COMPUTE = $params.useCPU" \$PARAM  # might need some modification
+    sed -i "/^NTHREAD_COMPUTE /c\\NTHREAD_COMPUTE = $params.force_cpu" \$PARAM  # might need some modification
     sed -i "/^NTHREAD_WRITE /c\\NTHREAD_WRITE = 1" \$PARAM            # might need some modification
 
 
@@ -59,12 +50,12 @@ process HIGHER_LEVEL_CONFIG {
 
 
     # date range
-    sed -i "/^DATE_RANGE /c\\DATE_RANGE = $params.startdate $params.enddate" \$PARAM
+    sed -i "/^DATE_RANGE /c\\DATE_RANGE = $params.start_date $params.end_date" \$PARAM
 
 
     # spectral index
-    sed -i "/^INDEX /c\\INDEX = SMA${params.onlyTile ? ' NDVI BLUE GREEN RED NIR SWIR1 SWIR2' : ''}" \$PARAM
-    ${ params.onlyTile ? 'sed -i "/^OUTPUT_TSS /c\\OUTPUT_TSS = TRUE" \$PARAM' : ''}
+    sed -i "/^INDEX /c\\INDEX = SMA${params.only_tile ? ' NDVI BLUE GREEN RED NIR SWIR1 SWIR2' : ''}" \$PARAM
+    ${ params.only_tile ? 'sed -i "/^OUTPUT_TSS /c\\OUTPUT_TSS = TRUE" \$PARAM' : ''}
 
     # interpolation
     sed -i "/^INT_DAY /c\\INT_DAY = 8" \$PARAM

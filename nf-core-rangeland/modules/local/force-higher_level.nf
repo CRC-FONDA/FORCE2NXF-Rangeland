@@ -2,8 +2,7 @@ nextflow.enable.dsl = 2
 
 process FORCE_HIGHER_LEVEL {
 
-    container "davidfrantz/force:${params.forceVer}"
-    tag { tile }
+    container "davidfrantz/force:${params.force_version}"
 
     input:
     path config

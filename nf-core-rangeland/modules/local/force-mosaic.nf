@@ -1,13 +1,9 @@
 nextflow.enable.dsl = 2
 
-params.outdata = ""
-params.forceVer = "latest"
-
 process FORCE_MOSAIC{
 
     tag { product }
-    container "davidfrantz/force:${params.forceVer}"
-    publishDir "${params.outdata}/trend/mosaic/$product", mode:'copy', enabled: params.publish
+    container "davidfrantz/force:${params.force_version}"
 
     input:
     tuple val( product ), path('trend/*')

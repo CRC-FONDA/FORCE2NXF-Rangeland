@@ -5,17 +5,10 @@ include { FORCE_GENERATE_TILE_ALLOW_LIST } from '../../modules/local/force-gener
 include { FORCE_GENERATE_ANALYSIS_MASK } from '../../modules/local/force-generate_analysis_mask'
 include { PREPROCESS_CONFIG } from '../../modules/local/preprocess_force_config'
 include { FORCE_PREPROCESS } from '../../modules/local/force-preprocess'
-
 include { MERGE as MERGE_BOA; MERGE as MERGE_QAI } from '../../modules/local/merge'
 
 //Closure to extract the parent directory of a file
 def extractDirectory = { it.parent.toString().substring(it.parent.toString().lastIndexOf('/') + 1 ) }
-
-params.outdata = ""
-params.resolution = 30
-//Number of images to merge in one process
-params.groupSize = 100
-params.forceVer = "latest"
 
 workflow PREPROCESSING {
 
@@ -48,13 +41,13 @@ workflow PREPROCESSING {
                                 //Sort to ensure the same groups if you use resume
                                 .toSortedList{ a,b -> a[1][0].simpleName <=> b[1][0].simpleName }
                                 .flatMap{it}
-                                .groupTuple( remainder : true, size : params.groupSize ).map{ [ it[0], it[1] .flatten() ] }
+                                .groupTuple( remainder : true, size : params.group_size ).map{ [ it[0], it[1] .flatten() ] }
         qai_tiles_to_merge = qai_tiles.filter{ x -> x[1].size() > 1 }
                                 .map{ [ it[0].substring( 0, 11 ), it[1] ] }
                                 //Sort to ensure the same groups if you use resume
                                 .toSortedList{ a,b -> a[1][0].simpleName <=> b[1][0].simpleName }
                                 .flatMap{it}
-                                .groupTuple( remainder : true, size : params.groupSize ).map{ [ it[0], it[1] .flatten() ] }
+                                .groupTuple( remainder : true, size : params.group_size ).map{ [ it[0], it[1] .flatten() ] }
 
         //Find tiles with only one file
         boa_tiles_done = boa_tiles.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0] .substring( 0, 11 ), x[1][0] ] }

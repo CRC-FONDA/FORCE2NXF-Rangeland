@@ -1,11 +1,8 @@
 nextflow.enable.dsl = 2
 
-params.resolution = 30
-params.forceVer = "latest"
-
 process FORCE_GENERATE_ANALYSIS_MASK{
 
-    container "davidfrantz/force:${params.forceVer}"
+    container "davidfrantz/force:${params.force_version}"
 
     input:
     path aoi
