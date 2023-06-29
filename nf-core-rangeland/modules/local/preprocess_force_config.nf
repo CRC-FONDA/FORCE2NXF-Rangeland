@@ -14,7 +14,7 @@ process PREPROCESS_CONFIG {
     path wvdb
 
     output:
-    tuple path("*.prm"), path(data), emit: preprocess_config_and_data
+    tuple path("*.prm"), path(data), path(cube), path(tile), path(dem), path(wvdb),  emit: preprocess_config_and_data
     path "*.prm"
 
     script:

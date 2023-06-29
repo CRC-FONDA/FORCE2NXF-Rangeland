@@ -11,7 +11,7 @@ process HIGHER_LEVEL_CONFIG {
     path endmember
 
     output:
-    path( "higher_level_force_conf/trend_${tile}.prm" ), emit: higher_level_configs
+    tuple path( "higher_level_force_conf/trend_${tile}.prm" ), path( "ard/${tile}/*" ), path( "mask/${tile}/aoi.tif" ), emit: higher_level_configs_and_data
 
     """
     # generate parameterfile from scratch

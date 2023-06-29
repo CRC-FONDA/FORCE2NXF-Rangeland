@@ -6,7 +6,7 @@ process FORCE_PREPROCESS {
     container "davidfrantz/force:${params.force_version}"
 
     input:
-    tuple path(conf), path(data)
+    tuple path(conf), path(data), path(cube), path(tile), path(dem), path(wvdb)
 
     output:
     path "*BOA.tif", emit: boa_tiles optional true
