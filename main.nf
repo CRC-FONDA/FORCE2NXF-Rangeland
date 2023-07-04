@@ -34,7 +34,7 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { RANGELAND } from './workflows/rangeland'
+include { RANGELAND } from './workflows/workflow-dsl2'
 
 //
 // WORKFLOW: Run main nf-core/rangeland analysis pipeline
