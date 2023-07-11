@@ -18,7 +18,7 @@ def inRegion = input -> {
     return date >= start && date <= end
 }
 
-workflow {
+workflow RANGELAND {
 
     data = Channel.fromPath( "${params.data}/*/*", type: 'dir') .flatten()
     data = data.flatten().filter{ inRegion(it) }
