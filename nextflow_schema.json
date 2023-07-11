@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["outdir", "input"],
+            "required": ["input", "outdir"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -34,6 +34,33 @@
                     "type": "string",
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
                     "fa_icon": "fas fa-file-signature"
+                },
+                "data": {
+                    "type": "string",
+                    "default": "null/download/data",
+                    "fa_icon": "fas fa-layer-group",
+                    "help_text": "Images derived from the satellite archives."
+                },
+                "dem": {
+                    "type": "string",
+                    "default": "null/dem/",
+                    "help_text": "\n\n\n"
+                },
+                "wvdb": {
+                    "type": "string",
+                    "default": "null/wvdb/"
+                },
+                "data_cube": {
+                    "type": "string",
+                    "default": "null/grid/datacube-definition.prj"
+                },
+                "aoi": {
+                    "type": "string",
+                    "default": "null/vector/aoi.gpkg"
+                },
+                "endmember": {
+                    "type": "string",
+                    "default": "null/endmember/hostert-2003.txt"
                 }
             }
         },
@@ -203,6 +230,79 @@
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
                 }
             }
+        },
+        "pipeline_parameters": {
+            "title": "Pipeline parameters",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "group_size": {
+                    "type": "integer",
+                    "default": 100
+                },
+                "skip_result_checking": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "publish": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "only_tile": {
+                    "type": "string",
+                    "default": "null"
+                },
+                "sensors_level1": {
+                    "type": "string",
+                    "default": "LT04,LT05,LE07,S2A"
+                },
+                "sensors_level2": {
+                    "type": "string",
+                    "default": "LND04 LND05 LND07"
+                },
+                "resolution": {
+                    "type": "integer",
+                    "default": 30
+                },
+                "start_date": {
+                    "type": "string",
+                    "default": "1984-01-01"
+                },
+                "end_date": {
+                    "type": "string",
+                    "default": "2006-12-31"
+                }
+            }
+        },
+        "force_parameters": {
+            "title": "FORCE parameters",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "force_cpu": {
+                    "type": "integer",
+                    "default": 2
+                },
+                "force_version": {
+                    "type": "string",
+                    "default": "3.6.5"
+                }
+            },
+            "fa_icon": "fas fa-terminal"
+        },
+        "new_group_3": {
+            "title": "New Group 3",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "water_vapor_url": {
+                    "type": "string",
+                    "default": "https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1"
+                }
+            }
         }
     },
     "allOf": [
@@ -217,80 +317,15 @@
         },
         {
             "$ref": "#/definitions/generic_options"
+        },
+        {
+            "$ref": "#/definitions/pipeline_parameters"
+        },
+        {
+            "$ref": "#/definitions/force_parameters"
+        },
+        {
+            "$ref": "#/definitions/new_group_3"
         }
-    ],
-    "properties": {
-        "only_tile": {
-            "type": "string",
-            "default": "null"
-        },
-        "group_size": {
-            "type": "integer",
-            "default": 100
-        },
-        "skip_result_checking": {
-            "type": "boolean",
-            "default": true
-        },
-        "publish": {
-            "type": "boolean",
-            "default": true
-        },
-        "force_version": {
-            "type": "string",
-            "default": "3.6.5"
-        },
-        "force_cpu": {
-            "type": "integer",
-            "default": 2
-        },
-        "sensors_level1": {
-            "type": "string",
-            "default": "LT04,LT05,LE07,S2A"
-        },
-        "sensors_level2": {
-            "type": "string",
-            "default": "LND04 LND05 LND07"
-        },
-        "resolution": {
-            "type": "integer",
-            "default": 30
-        },
-        "start_date": {
-            "type": "string",
-            "default": "1984-01-01"
-        },
-        "end_date": {
-            "type": "string",
-            "default": "2006-12-31"
-        },
-        "water_vapor_url": {
-            "type": "string",
-            "default": "https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1"
-        },
-        "data": {
-            "type": "string",
-            "default": "null/download/data"
-        },
-        "dem": {
-            "type": "string",
-            "default": "null/dem/"
-        },
-        "wvdb": {
-            "type": "string",
-            "default": "null/wvdb/"
-        },
-        "data_cube": {
-            "type": "string",
-            "default": "null/grid/datacube-definition.prj"
-        },
-        "aoi": {
-            "type": "string",
-            "default": "null/vector/aoi.gpkg"
-        },
-        "endmember": {
-            "type": "string",
-            "default": "null/endmember/hostert-2003.txt"
-        }
-    }
+    ]
 }
