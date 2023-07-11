@@ -54,15 +54,6 @@
                     "fa_icon": "fas fa-book",
                     "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
                 },
-                "fasta": {
-                    "type": "string",
-                    "format": "file-path",
-                    "mimetype": "text/plain",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
-                    "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
-                    "fa_icon": "far fa-file-code"
-                },
                 "igenomes_base": {
                     "type": "string",
                     "format": "directory-path",
@@ -79,14 +70,6 @@
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
                 }
             }
-        },
-        "institutional_config_options": {
-            "title": "Institutional config options",
-            "type": "object",
-            "fa_icon": "fas fa-university",
-            "description": "Parameters used to describe centralised config profiles. These should not be edited.",
-            "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline.",
-            "properties": {}
         },
         "max_job_request_options": {
             "title": "Max job request options",
@@ -235,13 +218,89 @@
             "$ref": "#/definitions/reference_genome_options"
         },
         {
-            "$ref": "#/definitions/institutional_config_options"
-        },
-        {
             "$ref": "#/definitions/max_job_request_options"
         },
         {
             "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "only_tile": {
+            "type": "string",
+            "default": "null"
+        },
+        "group_size": {
+            "type": "integer",
+            "default": 100
+        },
+        "skip_result_checking": {
+            "type": "boolean",
+            "default": true
+        },
+        "publish": {
+            "type": "boolean",
+            "default": true
+        },
+        "force_version": {
+            "type": "string",
+            "default": "3.6.5"
+        },
+        "force_cpu": {
+            "type": "integer",
+            "default": 2
+        },
+        "sensors_level1": {
+            "type": "string",
+            "default": "LT04,LT05,LE07,S2A"
+        },
+        "sensors_level2": {
+            "type": "string",
+            "default": "LND04 LND05 LND07"
+        },
+        "resolution": {
+            "type": "integer",
+            "default": 30
+        },
+        "start_date": {
+            "type": "string",
+            "default": "1984-01-01"
+        },
+        "end_date": {
+            "type": "string",
+            "default": "2006-12-31"
+        },
+        "water_vapor_url": {
+            "type": "string",
+            "default": "https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1"
+        },
+        "base_data_path": {
+            "type": "string",
+            "default": "None"
+        },
+        "data": {
+            "type": "string",
+            "default": "null/download/data"
+        },
+        "dem": {
+            "type": "string",
+            "default": "null/dem/"
+        },
+        "wvdb": {
+            "type": "string",
+            "default": "null/wvdb/"
+        },
+        "data_cube": {
+            "type": "string",
+            "default": "null/grid/datacube-definition.prj"
+        },
+        "aoi": {
+            "type": "string",
+            "default": "null/vector/aoi.gpkg"
+        },
+        "endmember": {
+            "type": "string",
+            "default": "null/endmember/hostert-2003.txt"
+        }
+    },
+    "required": ["base_data_path"]
 }

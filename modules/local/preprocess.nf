@@ -12,7 +12,7 @@ process preprocess {
     container "davidfrantz/force:${params.force_version}"
 
     publishDir "${params.outdir}/preprocess_logs", mode: 'copy', pattern: '**.log', enabled: params.publish
-    publishDir "${params.outdir}/preprocess_prm", mode: 'copy', pattern: '**.prm', enabled: params.publish
+    publishDir "${params.outdir}/preprocess_prm" , mode: 'copy', pattern: '**.prm', enabled: params.publish
 
     errorStrategy 'retry'
     maxRetries 5
