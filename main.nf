@@ -18,6 +18,7 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+// This is a geo workflow we don't need fasta
 // params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
 
 /*
