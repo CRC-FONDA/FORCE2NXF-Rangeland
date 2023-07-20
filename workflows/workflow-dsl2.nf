@@ -7,7 +7,7 @@ include { CHECK_RESULTS } from '../modules/local/check_results'
 include { PREPROCESSING } from '../subworkflows/local/preprocessing'
 include { HIGHER_LEVEL }  from '../subworkflows/local/higher_level'
 
-println("input data path: '$params.data'")
+println("input data path: '$params.input'")
 
 time_range = "${params.start_date.replace('-', '')},${params.end_date.replace('-', '')}"
 
@@ -20,12 +20,12 @@ def inRegion = input -> {
 
 workflow RANGELAND {
 
-    data = Channel.fromPath( "${params.data}/*/*", type: 'dir') .flatten()
-    data = data.flatten().filter{ inRegion(it) }
-    dem = file( "$params.dem")
-    wvdb = file( "$params.wvdb")
-    cube_file = file( "$params.data_cube" )
-    aoi_file = file( "$params.aoi" )
+    data           = Channel.fromPath( "${params.input}/*/*", type: 'dir') .flatten()
+    data           = data.flatten().filter{ inRegion(it) }
+    dem            = file( "$params.dem")
+    wvdb           = file( "$params.wvdb")
+    cube_file      = file( "$params.data_cube" )
+    aoi_file       = file( "$params.aoi" )
     endmember_file = file( "$params.endmember" )
 
     PREPROCESSING(data, dem, wvdb, cube_file, aoi_file)
