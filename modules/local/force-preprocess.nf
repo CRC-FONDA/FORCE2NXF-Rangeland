@@ -9,8 +9,8 @@ process FORCE_PREPROCESS {
     tuple path(conf), path(data), path(cube), path(tile), path(dem), path(wvdb)
 
     output:
-    path "*BOA.tif", emit: boa_tiles optional true
-    path "*QAI.tif", emit: qai_tiles optional true
+    path "**/*BOA.tif", optional:true, emit: boa_tiles
+    path "**/*QAI.tif", optional:true, emit: qai_tiles
     path "*.log"
 
     """

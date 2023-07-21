@@ -12,9 +12,10 @@ println("input data path: '$params.input'")
 time_range = "${params.start_date.replace('-', '')},${params.end_date.replace('-', '')}"
 
 def inRegion = input -> {
-    Integer date = input.simpleName.split("_")[3] as Integer
+    Integer date  = input.simpleName.split("_")[3]    as Integer
     Integer start = params.start_date.replace('-','') as Integer
-    Integer end = params.end_date.replace('-','') as Integer
+    Integer end   = params.end_date.replace('-','')   as Integer
+
     return date >= start && date <= end
 }
 
