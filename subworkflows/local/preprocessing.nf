@@ -53,8 +53,8 @@ workflow PREPROCESSING {
         boa_tiles_done = boa_tiles.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0] .substring( 0, 11 ), x[1][0] ] }
         qai_tiles_done = qai_tiles.filter{ x -> x[1].size() == 1 }.map{ x -> [ x[0] .substring( 0, 11 ), x[1][0] ] }
 
-        MERGE_BOA( file("merge-boa.r"), boa_tiles_to_merge, cube_file )
-        MERGE_QAI( file("merge-qai.r"), qai_tiles_to_merge, cube_file )
+        MERGE_BOA( file("bin/merge-boa.r"), boa_tiles_to_merge, cube_file )
+        MERGE_QAI( file("bin/merge-qai.r"), qai_tiles_to_merge, cube_file )
 
         //Concat merged list with single images, group by tile over time
         boa_tiles = MERGE_BOA.out.tiles_merged
