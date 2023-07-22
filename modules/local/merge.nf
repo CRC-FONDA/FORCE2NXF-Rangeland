@@ -9,7 +9,7 @@ process MERGE {
     container 'davidfrantz/force:dev'
 
     input:
-    path ("merge.r")
+    val ( data_type ) // defines whether qai or boa is merged
     tuple val( id ), path( 'input/?/*' )
     path cube
 
@@ -31,7 +31,11 @@ process MERGE {
 
         #merge together
         matchingFiles=`ls -- */*/\${file}`
-        ./merge.r \$file \${matchingFiles}
+        if [ "$data_type" = "boa" ]; then
+            merge_boa.r \$file \${matchingFiles}
+        elif [ "$data_type" = "qai" ]; then
+            merge_qai.r \$file \${matchingFiles}
+        fi
 
         #apply meta
         force-mdcp \$onefile \$file
