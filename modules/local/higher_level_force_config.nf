@@ -11,12 +11,12 @@ process HIGHER_LEVEL_CONFIG {
     path endmember
 
     output:
-    tuple path( "higher_level_force_conf/trend_${tile}.prm" ), path( "ard/${tile}/*" ), path( "mask/${tile}/aoi.tif" ), emit: higher_level_configs_and_data
+    tuple path( "trend_${tile}.prm" ), path( "ard/${tile}/*" ), path( "mask/${tile}/aoi.tif" ), emit: higher_level_configs_and_data
 
     """
     # generate parameterfile from scratch
     force-parameter . TSA 0
-    PARAM=higher_level_force_conf/trend_"$tile".prm
+    PARAM=trend_"$tile".prm
     mv *.prm \$PARAM
 
     # set parameters
