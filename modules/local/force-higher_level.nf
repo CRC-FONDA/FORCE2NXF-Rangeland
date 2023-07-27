@@ -5,7 +5,7 @@ process FORCE_HIGHER_LEVEL {
     container "davidfrantz/force:${params.force_version}"
 
     input:
-    tuple path( config ), path( ard ), path( aoi )
+    tuple path( config ), path( ard ), path( aoi ), path ( datacube ), path ( endmember )
 
     output:
     path 'trend/*.tif*', emit: trend_files
