@@ -9,13 +9,21 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 // Validate input parameters
 WorkflowRangeland.initialise(params, log)
 
-// TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
+def checkPathParamList = [ params.input, params.dem, params.wvdb, params.data_cube, params.aoi, params.endmember, params.multiqc_config ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+
+// check wether provided input is within provided time range
+def inRegion = input -> {
+    Integer date  = input.simpleName.split("_")[3]    as Integer
+    Integer start = params.start_date.replace('-','') as Integer
+    Integer end   = params.end_date.replace('-','')   as Integer
+
+    return date >= start && date <= end
+}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,7 +45,10 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { INPUT_CHECK }   from '../subworkflows/local/input_check'
+include { CHECK_RESULTS } from '../modules/local/check_results'
+include { PREPROCESSING } from '../subworkflows/local/preprocessing'
+include { HIGHER_LEVEL }  from '../subworkflows/local/higher_level'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,7 +59,6 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
@@ -64,23 +74,49 @@ def multiqc_report = []
 workflow RANGELAND {
 
     ch_versions = Channel.empty()
-
-    //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
+    /*
     INPUT_CHECK (
         ch_input
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    */
 
     //
-    // MODULE: Run FastQC
+    // Stage and validate input files
     //
-    FASTQC (
-        INPUT_CHECK.out.reads
-    )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    data           = Channel.fromPath( "${params.input}/*/*", type: 'dir') .flatten()
+    data           = data.flatten().filter{ inRegion(it) }
+    dem            = file( "$params.dem")
+    wvdb           = file( "$params.wvdb")
+    cube_file      = file( "$params.data_cube" )
+    aoi_file       = file( "$params.aoi" )
+    endmember_file = file( "$params.endmember" )
 
+
+    //
+    // SUBWORKFLOW: Preprocess satellite imagery
+    //
+    PREPROCESSING(data, dem, wvdb, cube_file, aoi_file)
+
+    preprocessed_data = PREPROCESSING.out.tiles_and_masks.filter { params.only_tile ? it[0] == params.only_tile : true }
+
+    //
+    // SUBWORKFLOW: Generate trend files and visualization
+    //
+    HIGHER_LEVEL( preprocessed_data, cube_file, endmember_file )
+
+    grouped_trend_data = HIGHER_LEVEL.out.trend_files.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
+
+    //
+    // MODULE: Check results
+    //
+    if ( !params.skip_result_checking ) {
+        CHECK_RESULTS( grouped_trend_data, file( params.reference_data ) )
+    }
+
+    //
+    // MODULE: Pipeline reporting
+    //
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
@@ -98,7 +134,6 @@ workflow RANGELAND {
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect(),

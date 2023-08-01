@@ -35,7 +35,7 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { RANGELAND } from './workflows/workflow-dsl2'
+include { RANGELAND } from './workflows/rangeland'
 
 //
 // WORKFLOW: Run main nf-core/rangeland analysis pipeline
