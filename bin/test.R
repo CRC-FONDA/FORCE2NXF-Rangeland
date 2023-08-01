@@ -7,7 +7,6 @@ if (length(args) != 3) {
   stop("\ngive input directory (mosaic) as 1st arg\ngive reference image (*.RData) as 2nd arg\ngive output file (*.txt) as 3rd arg", call.=FALSE)
 }
 
-dinp <- "/data/Jakku/fonda/reference/mosaic"
 dinp <- args[1]
 fref <- args[2]
 fout <- args[3]
@@ -193,4 +192,3 @@ if (total_diff_wood_syndrome > tol) stop("Area [km²] affected by a woody vegeta
 if (total_diff_herb_syndrome > tol) stop("Area [km²] affected by a herbaceous vegetation syndrome deviates from reference execution: mean abs percentage difference ", round(total_diff_herb_syndrome, 2))
 if (total_diff_wood_abs_gain > tol) stop("Absolute cover [km²] lost/gained by a woody vegetation syndrome deviates from reference execution: mean abs percentage difference ", round(total_diff_wood_abs_gain, 2))
 if (total_diff_herb_abs_gain > tol) stop("Absolute cover [km²] lost/gained by a herbaceous vegetation syndrome deviates from reference execution: mean abs percentage difference ", round(total_diff_herb_abs_gain, 2))
-  

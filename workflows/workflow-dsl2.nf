@@ -38,7 +38,7 @@ workflow RANGELAND {
     grouped_trend_data = HIGHER_LEVEL.out.trend_files.map{ it[1] }.flatten().buffer( size: Integer.MAX_VALUE, remainder: true )
 
     if ( !params.skip_result_checking ) {
-        CHECK_RESULTS( grouped_trend_data, file( "../assets/reference.RData" ) )
+        CHECK_RESULTS( grouped_trend_data, file( params.reference_data ) )
     }
 
 }
