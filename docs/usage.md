@@ -8,13 +8,154 @@
 
 <!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
 
-## Samplesheet input
+## Input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+As most remote sensing workflows, this pipeline relies on numerous sources of data. In the following we will describe the required data and corresponding formats. Mandatory input data consists of satellite data, a digital elevation model, a water vapor database, a data_cube, an area-of-interest specification and an endmember definition.
+
+### Satellite data
+
+This pipeline operates on Landsat data. Landsat is a joint NASA/U.S. Geolical Survey satellite mission that provides continuous Earth obersvation data since 1984 at 30m spatial resolution with a temporal revisit frequency of 8-16 days.
+Landsast carries multispectral optical instruments that observe the land surface in the visible to shortwave infrared spectrum.
+For infos on Landsat, see [here](https://www.usgs.gov/core-science-systems/nli/landsat).
+
+Satellite data should be given as a path to a common root of all imagery. This is a common format used in geographic information systems, including FORCE, which is applied in this pipeline. The expected structure underneath the root directory should follow this example:
+
+```
+root
+├── 181035
+│   └── LE07_L1TP_181035_20061217_20170106_01_T1
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_ANG.txt
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_B1.TIF
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_B2.TIF
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_B3.TIF
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_B4.TIF
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_B5.TIF
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_B6_VCID_1.TIF
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_B6_VCID_2.TIF
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_B7.TIF
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_B8.TIF
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_BQA.TIF
+│   |   ├── LE07_L1TP_181035_20061217_20170106_01_T1_GCP.txt
+│   |   └── LE07_L1TP_181035_20061217_20170106_01_T1_MTL.txt
+|   └── ...
+├── 181036
+│   └── LE07_L1TP_181036_20061217_20170105_01_T1
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_ANG.txt
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_B1.TIF
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_B2.TIF
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_B3.TIF
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_B4.TIF
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_B5.TIF
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_B6_VCID_1.TIF
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_B6_VCID_2.TIF
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_B7.TIF
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_B8.TIF
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_BQA.TIF
+│   |   ├── LE07_L1TP_181036_20061217_20170105_01_T1_GCP.txt
+│   |   └── LE07_L1TP_181036_20061217_20170105_01_T1_MTL.txt
+|   └── ...
+└── ...
+```
+
+Subdirectories of root contain _path_ and _row_ information as commonly used for Landsat imagery. As an example, the sub directory `181036/` contains imagery for path 18 and row 1036.
+
+The next level of subdirectories contains the data for a specific day and from a specific source. Lets look at the example `LE07_L1TP_181036_20061217_20170105_01_T1`:
+
+- "LE07" corresponds to Landsat 7 Enhanced
+- "L1TP" corresponds to Level-1 Terrain Corrected imagery
+- "181036" corresponds to the path and row of the imagery, this should match the subdirectory
+- "20061217" identifies the 17th December 2006 as the date of acquisition
+- "20170105" identifies the 5th January 2017 as the date of (re)processing
+- "01" corresponds to version number of the remote sensing product
+- "T1" corresponds to the Tier of the data collection, which indicates the Tier 1 landsat collection in this case
+
+On the lowest level of the structure, the actual data is stored. Looking at the contents of `LE07_L1TP_181036_20061217_20170105_01_T1`, we see that all files share the same prefix, followed by a specification of the specific files contents. These suffixes include:
+
+- "B" followed by a number _i_ identifying the band of the satellite (band 6 has two files as Landsat 7 has two thermal bands)
+- "BQA" identifying the quality information band
+- "GCP" identifies ground control point information
+- "ANG" identifies angle of observation and other geometric information information
+- "MTL" identifies meta data
+
+All files within the lowest level of structure belong to a single observation. Files containing imagery (prefix starts with "B") should be .tif files. Files containing auxiliary data are text files.
+
+This structure is automatically generated when [using force to download the data](https://force-eo.readthedocs.io/en/latest/components/lower-level/level1/level1-csd.html?). We strongly suggest users to download data using FORCE (e.g.). For example, executing the following code (e.g. with [FORCE in docker](https://force-eo.readthedocs.io/en/latest/setup/docker.html)) will download data for Landsat 4,5 and 7, in the time range from 1st January 1984 until 31st December 2006, including pictures with up to 70 percent of cloud coverage:
 
 ```bash
---input '[path to samplesheet file]'
+mkdir -p meta
+force-level1-csd -u -s "LT04,LT05,LE07" meta
+mkdir -p data
+force-level1-csd -s "LT04,LT05,LE07" -d "19840101,20061231" -c 0,70 meta/ data/ queue.txt vector/aoi.gpkg
 ```
+
+Note that you need to pass a area-of-interest file, see the area of interest section [Area of interest](#aoi) for details.
+
+The satellite imagery can be given to the pipeline using:
+
+```bash
+--input '[path to imagery root]'
+```
+
+### Digital Elevation Model (DEM)
+
+A DEM is necessary for topographic correction of Landsat data, and helps to distinguish between cloud shadows and water surfaces.
+The DEM obtained by the [Shuttle Radar Topography Mission](https://www2.jpl.nasa.gov/srtm/) (SRTM) is commonly used. Areas not covered by the SRTM DEM, can be filled with the [Advanced Spaceborne Thermal Emission and Reflection Radiometer](https://asterweb.jpl.nasa.gov/) (ASTER) DEM.
+
+In the setup described above we would expect a path to the Digital Elevation Model root directory as a parameter to the pipeline. Concretely, the expected structure would look like this:
+
+```
+dem
+├── global_srtm-aster.vrt
+└── srtm_aster
+    └── ...
+```
+
+Here, `global_srtm-aster.vrt` orchestrates the single digital elevation files in the `srtm_aster` directory.
+
+The DEM can be given to the pipeline using:
+
+```bash
+--input '[path to dem root]'
+```
+
+### Water Vapor Database (WVDB)
+
+For atmospheric correction of Landsat data, information on the atmospheric water vapor content is necessary.
+
+The expected format for the wvdb is a directory containing daily water vapor measurements for the area of interest.
+
+We strongly recommend using a precompiled water vapor database, like [this one](https://zenodo.org/record/4468701).
+This global water vapor database can be downloaded by executing this code:
+
+```bash
+wget -O wvp-global.tar.gz https://zenodo.org/record/4468701/files/wvp-global.tar.gz?download=1
+tar -xzf wvp-global.tar.gz --directory wvdb/
+rm wvp-global.tar.gz
+```
+
+The WVDB can be given to the pipeline using:
+
+```bash
+--input '[path to wvdb dir]'
+```
+
+### Datacube
+
+```bash
+--input '[path to imagery root]'
+```
+
+### Area of interest (AOI)
+
+<a id="aoi"></a>
+
+```bash
+--input '[path to imagery root]'
+```
+
+TODO: describe input format from satellite and update bash below, tailor following subsections from samplesheet to our input
+
+### Endmember
 
 ### Multiple runs of the same sample
 
