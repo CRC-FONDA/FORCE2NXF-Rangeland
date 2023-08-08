@@ -30,7 +30,7 @@ process HIGHER_LEVEL_CONFIG {
 
     # threading
     sed -i "/^NTHREAD_READ /c\\NTHREAD_READ = 1" \$PARAM              # might need some modification
-    sed -i "/^NTHREAD_COMPUTE /c\\NTHREAD_COMPUTE = $params.force_cpu" \$PARAM  # might need some modification
+    sed -i "/^NTHREAD_COMPUTE /c\\NTHREAD_COMPUTE = $params.force_threads" \$PARAM  # might need some modification
     sed -i "/^NTHREAD_WRITE /c\\NTHREAD_WRITE = 1" \$PARAM            # might need some modification
 
 
