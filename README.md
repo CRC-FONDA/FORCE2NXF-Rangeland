@@ -80,3 +80,9 @@ You can cite the `nf-core` publication as follows:
 > Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
 >
 > _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
+
+This pipeline is based one the following publication that can be cites as follows:
+
+> **FORCE on Nextflow: Scalable Analysis of Earth Observation Data on Commodity Clusters**
+>
+> [Lehmann, F., Frantz, D., Becker, S., Leser, U., Hostert, P. (2021). FORCE on Nextflow: Scalable Analysis of Earth Observation Data on Commodity Clusters. In CIKM Workshops.](https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/research/publications/2021/force_nextflow.pdf/@@download/file/force_nextflow.pdf)
