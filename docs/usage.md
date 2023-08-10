@@ -115,7 +115,7 @@ Here, `global_srtm-aster.vrt` orchestrates the single digital elevation files in
 The DEM can be given to the pipeline using:
 
 ```bash
---input '[path to dem root]'
+--dem '[path to dem root]'
 ```
 
 ### Water Vapor Database (WVDB)
@@ -136,26 +136,53 @@ rm wvp-global.tar.gz
 The WVDB can be given to the pipeline using:
 
 ```bash
---input '[path to wvdb dir]'
+--wvdb '[path to wvdb dir]'
 ```
 
 ### Datacube
 
+The datacube definition stores information about the projection and reference grid of the generated datacube. For details see the [FORCE main paper](https://www.mdpi.com/2072-4292/11/9/1124).
+
+The datacube definition is passed as a single file using:
+
 ```bash
---input '[path to imagery root]'
+--data_cube '[path to datacube definition file]'
 ```
 
 ### Area of interest (AOI)
 
 <a id="aoi"></a>
 
+The area of interest is a geospatial vector dataset that holds the boundary of the targeted area.
+
+AOI is passed as a single using:
+
 ```bash
---input '[path to imagery root]'
+--aoi '[path to area of interest file]'
 ```
 
-TODO: describe input format from satellite and update bash below, tailor following subsections from samplesheet to our input
-
 ### Endmember
+
+For unmixing satellite-observed reflectance into sub-pixel fractions of land surface components (e.g. photosynthetic active vegetation), endmember spectra are necessary.
+
+An example endmember (developed in [Hostert et al. 2003](https://www.sciencedirect.com/science/article/abs/pii/S0034425703001457)) looks like this:
+
+```
+320  730  2620 0
+560  1450 3100 0
+450  2240 3340 0
+3670 2750 4700 0
+1700 4020 7240 0
+710  3220 5490 0
+```
+
+Each colum represents a different endmember. Columns represent Landsat bands (R,G,B, NIR, SWIR1, SWIR2).
+
+The endmembers can be passed in a single text-file using:
+
+```bash
+--endmember '[path to endmember]'
+```
 
 ### Multiple runs of the same sample
 
