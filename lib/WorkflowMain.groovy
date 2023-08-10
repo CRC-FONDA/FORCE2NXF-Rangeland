@@ -22,7 +22,7 @@ class WorkflowMain {
     // Generate help string
     //
     public static String help(workflow, params, log) {
-        def command = "nextflow run ${workflow.manifest.name} --input <SATELLITE_DATA_DIR> --dem <DIGITAL_ELEVATION_DIR> --wvdb <WATOR_VAPOR_DIR> --data_cube <DATACUBE_FILE> --aoi <AREA_OF_INTEREST_FILE> --endmember <ENDMEMBER_FILE> --outdir /output  -profile docker"
+        def command = "nextflow run ${workflow.manifest.name} --input <SATELLITE_DATA_DIR> --dem <DIGITAL_ELEVATION_DIR> --wvdb <WATOR_VAPOR_DIR> --data_cube <DATACUBE_FILE> --aoi <AREA_OF_INTEREST_FILE> --endmember <ENDMEMBER_FILE> --outdir <OUTDIR>  -profile docker"
         def help_string = ''
         help_string += NfcoreTemplate.logo(workflow, params.monochrome_logs)
         help_string += NfcoreSchema.paramsHelp(workflow, params, command)
