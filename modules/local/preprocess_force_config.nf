@@ -34,8 +34,11 @@ process PREPROCESS_CONFIG {
     TILESIZE=\$(sed '6q;d' $cube)
     BLOCKSIZE=\$(sed '7q;d' $cube)
 
+    # get dem vrt file
+    dem_file=\$(find $dem/ -type f -name "*.vrt" -print | head -n 1)
+
     # set parameters
-    sed -i "/^FILE_DEM /c\\FILE_DEM = $dem/global_srtm-aster.vrt" \$PARAM
+    sed -i "/^FILE_DEM /c\\FILE_DEM = \$dem_file" \$PARAM
     sed -i "/^DIR_WVPLUT /c\\DIR_WVPLUT = $wvdb" \$PARAM
     sed -i "/^FILE_TILE /c\\FILE_TILE = $tile" \$PARAM
     sed -i "/^TILE_SIZE /c\\TILE_SIZE = \$TILESIZE" \$PARAM
