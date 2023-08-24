@@ -184,6 +184,101 @@ The endmembers can be passed in a single text-file using:
 --endmember '[path to endmember]'
 ```
 
+## Pipeline configuration
+
+Users can specify additional parameters to configure how the underlying workflow tools handle the provided data.
+
+### Sensor Levels
+
+Data from different satellites can be processed within this workflow. Users may wish to include different satellites in preprocessing and in higher level processing. To control this behavior, two parameters can be set when the pipeline is launched.
+The first parameter - `sensors_level1` - controls the selection of satellites for preprocessing. This parameter should follow the FORCE notation for level 1 processing of satellites. Concretely, a string containing comma-separated satellite identifiers has to be supplied (e.g. `"LT04,LT05"` to include Landsat 4 and 5). Available options for satellite identifiers are:
+
+- `"LT04"`: Landsat 4 TM
+- `"LT05"`: Landsat 5 TM
+- `"LE07"`: Landsat 7 ETM+
+- `"LC08"`: Landsat 8 OLI
+- `"S2A"`: Sentinel-2A MSI
+- `"S2B"`: Sentinel-2B MSI
+
+The second parameter - `sensors_level2` - controls the selection of satellites for the higher level processing steps. The parameter has to follow the FORCE notation for level 2 processing. In particular, a string containing space-separated satellite identifiers has to be supplied (e.g. `"LND04 LND05"` to include Landsat 4 and 5). Note that these identifiers differ from those used for the `sensors_level1` parameter.
+More details on available satellite identifiers can be found [here](https://force-eo.readthedocs.io/en/latest/components/higher-level/tsa/param.html), some common options include:
+
+- `"LND04"`: 6-band Landsat 4 TM
+- `"LND05"`: 6-band Landsat 5 TM
+- `"LND07"`: 6-band Landsat 7 ETM+
+- `"LND08/09"`: 6-band Landsat 8-9 OLI
+- `"SEN2A"`: 10-band Sentinel-2A
+- `"SEN2B"`: 10-band Sentinel-2B
+
+Note that the identifiers specified for both processing levels have to match the data made available to the workflow. In other words, satellite data for e.g. Landsat 5 can't be processed if it was not supplied using the `input` parameter.
+
+Both parameters can be passed as using:
+
+```bash
+--sensors_level1 = '[preprocessing satellite identifier string]'
+--sensors_level2 = '[higher level processing satellite identifier string]'
+```
+
+Note that both parameters are optional and are by default set to: `"LT04,LT05,LE07,S2A"` and `"LND04 LND05 LND07"`. Therefore, by default, the pipeline will use Landsat 4,5,7, and Sentinel 2 for preprocessing, while using Landsat 4,5 and 7 for higher level processing.
+
+### Resolution
+
+Resolution of satellite imagery defines the real size of a single pixel. As an example, a resolution of 30 meters indicates that a single pixel in the data covers a 30x30 meters square of the earths surface. Users can customize the resolution that FORCE should assume. This does not necessarily have to match the resolution of the supplied data. FORCE will treat imagery as having the specified resolution. However, passing a resolution not matching the satellite data might lead to unexpected results. Resolution is specified in meters.
+
+A custom resolution can be passed using:
+
+```bash
+--resolution '[integer]'
+```
+
+The default value is 30, as most Landsat satellite natively provide this resolution.
+
+### Temporal extent
+
+In some scenarios, user may be interested to limit the temporal extent of analysis. To enables this, users can specify both start and end date in a string with this syntax: `'YYYY-MM-DD'`.
+
+Start and end date can be passed using:
+
+```bash
+--start_date '[YYYY-MM-DD]'
+--end_date   '[YYYY-MM-DD]'
+```
+
+Default values are `'1984-01-01'` for the start date and `'2006-12-31'` for the end date.
+
+### Spectral Unmixing
+
+Spectral unmixing is a common technique to derive sub-pixel classification. Concretely, a set of endmember (provided using `--endmember`) is exploited to determine fractions of different types of vegetation, soil, $\ldots$ for each pixel. In this workflow, we users can enable spectral unmixing-based classification using the `only_tile` parameter. To enable spectral unmixing, user have to set the parameters to `true`, as this feature is disabled by default.
+
+Spectral unmixing can be enabled or disabled using:
+
+```bash
+--endmember '[true|false]'
+```
+
+### Group size
+
+The `group_size` parameters can be ignored in most cases. It defines how many satellite scenes are processed together. The parameters is used to balance the tradeoff between I/O and computational capacities on individual compute nodes. By default, `group_size` is set to 100.
+
+The group size can be passed using:
+
+```bash
+--group_size '[integer]'
+```
+
+### FORCE configuration
+
+Users can change certain characteristics of the underlying FORCE tool. First, it is possible to change the version of FORCE using in the pipeline using the `force_version` parameters. The version number should follow the semantic versioning pattern, e.g. "3.6.5". Second, as FORCE supports parallel computations, user can specify the number of threads FORCE can spawn for a single preprocessing or higher level processing process. This is archived through the `force_threads` parameter.
+
+FORCE version and number of threads can be passed using:
+
+```bash
+--force_version '[Sematic versioning number]'
+--force_threads '[integer]'
+```
+
+Defaults are "3.6.5" for the FORCE version and 2 for the nu,ber of threads.
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
