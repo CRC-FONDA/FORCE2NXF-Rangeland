@@ -13,7 +13,7 @@ process FORCE_GENERATE_ANALYSIS_MASK{
     path 'mask/*/*.tif', emit: masks
 
     """
-    force-cube $aoi mask/ rasterize $params.resolution
+    force-cube -o mask/ -s $params.resolution $aoi
     """
 
 }
