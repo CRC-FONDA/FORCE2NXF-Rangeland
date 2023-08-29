@@ -27,7 +27,7 @@ process FORCE_PREPROCESS {
     sed -i "/^DIR_LEVEL2 /c\\DIR_LEVEL2 = level2_ard/" \$PARAM
     sed -i "/^DIR_LOG /c\\DIR_LOG = level2_log/" \$PARAM
     sed -i "/^DIR_TEMP /c\\DIR_TEMP = level2_tmp/" \$PARAM
-    sed -i "/^DIR_PROVENANCE /c\\DIR_PROVENANCE = level2_prov/" \&PARAM
+    sed -i "/^DIR_PROVENANCE /c\\DIR_PROVENANCE = level2_prov/" \$PARAM
 
     FILEPATH=$data
     BASE=\$(basename $data)
