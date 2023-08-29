@@ -20,12 +20,14 @@ process FORCE_PREPROCESS {
     mkdir level2_ard
     mkdir level2_log
     mkdir level2_tmp
+    mkdir level2_prov
 
 
     # set output directories in parameter file
     sed -i "/^DIR_LEVEL2 /c\\DIR_LEVEL2 = level2_ard/" \$PARAM
     sed -i "/^DIR_LOG /c\\DIR_LOG = level2_log/" \$PARAM
     sed -i "/^DIR_TEMP /c\\DIR_TEMP = level2_tmp/" \$PARAM
+    sed -i "/^DIR_PROVENANCE /c\\DIR_PROVENANCE = level2_prov/" \&PARAM
 
     FILEPATH=$data
     BASE=\$(basename $data)

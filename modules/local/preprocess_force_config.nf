@@ -23,7 +23,7 @@ process PREPROCESS_CONFIG {
     BASE=\$(basename $data)
 
     # generate parameterfile from scratch
-    force-parameter . LEVEL2 0
+    force-parameter -c ./preprocess_${tile}.prm LEVEL2
     PARAM=\$BASE.prm
     mv *.prm \$PARAM
 
