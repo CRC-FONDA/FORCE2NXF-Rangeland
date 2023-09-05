@@ -17,7 +17,6 @@ process HIGHER_LEVEL_CONFIG {
     # generate parameterfile from scratch
     force-parameter -c ./trend_${tile}.prm TSA
     PARAM=trend_"$tile".prm
-    mv *.prm \$PARAM
 
     # set parameters
 
