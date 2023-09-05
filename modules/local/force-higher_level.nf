@@ -12,9 +12,16 @@ process FORCE_HIGHER_LEVEL {
 
 
 """
+PARAM=$config
+
 mkdir trend
 
-force-higher-level $config
+# set provenance
+mkdir prov
+sed -i "/^DIR_PROVENANCE /c\\DIR_PROVENANCE = prov/" \$PARAM
+
+
+force-higher-level \$PARAM
 
 #Rename files: /trend/<Tile>/<Filename> to <Tile>_<Filename>, otherwise we can not reextract the tile name later
 results=`find trend -name '*.tif*'`
