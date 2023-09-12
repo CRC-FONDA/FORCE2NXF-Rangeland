@@ -6,8 +6,13 @@ process CHECK_RESULTS {
     container 'rocker/geospatial:3.6.3'
 
     input:
-    file{ "trend/?/*" }
-    file( reference )
+    path{ "trend/?/*" }
+    path woody_change_ref
+    path woody_yoc_ref
+    path herbaceous_change_ref
+    path herbaceous_yoc_ref
+    path peak_change_ref
+    path peak_yoc_ref
 
     """
     files=`find ./trend/ -maxdepth 1 -mindepth 1 -type d`
@@ -16,7 +21,7 @@ process CHECK_RESULTS {
         cp \$path/*/* trend/\$(ls \$path)/
         rm \$path -r
     done;
-    test.R trend/mosaic $reference log.log
+    test.R trend/mosaic $woody_change_ref $woody_yoc_ref $herbaceous_change_ref $herbaceous_yoc_ref $peak_change_ref $peak_yoc_ref
     """
 
 }
