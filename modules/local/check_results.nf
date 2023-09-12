@@ -21,7 +21,7 @@ process CHECK_RESULTS {
         cp \$path/*/* trend/\$(ls \$path)/
         rm \$path -r
     done;
-    test.R trend/mosaic $woody_change_ref $woody_yoc_ref $herbaceous_change_ref $herbaceous_yoc_ref $peak_change_ref $peak_yoc_ref log.log
+    test.R trend/mosaic $woody_change_ref $woody_yoc_ref $herbaceous_change_ref $herbaceous_yoc_ref $peak_change_ref $peak_yoc_ref
     """
 
 }
