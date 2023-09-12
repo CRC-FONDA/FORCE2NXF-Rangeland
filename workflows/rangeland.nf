@@ -111,7 +111,14 @@ workflow RANGELAND {
     // MODULE: Check results
     //
     if ( !params.skip_result_checking ) {
-        CHECK_RESULTS( grouped_trend_data, file( params.reference_data ) )
+        woody_change_ref      = file("$params.woody_change_ref")
+        woody_yoc_ref         = file("$params.woody_yoc_ref")
+        herbaceous_change_ref = file("$params.herbaceous_change_ref")
+        herbaceous_yoc_ref    = file("$params.herbaceous_yoc_ref")
+        peak_change_ref       = file("$params.peak_change_ref")
+        peak_yoc_ref          = file("$params.peak_yoc_ref")
+
+        CHECK_RESULTS( grouped_trend_data, woody_change_ref, woody_yoc_ref, herbaceous_change_ref, herbaceous_yoc_ref, peak_change_ref, peak_yoc_ref)
     }
 
     //
