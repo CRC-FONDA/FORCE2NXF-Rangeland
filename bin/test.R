@@ -22,8 +22,8 @@ require(terra)
 woody_cover_changes_ref        <- rast(args[2])
 woody_cover_year_of_change_ref <- rast(args[3])
 
-herbaceous_cover_changes        <- rast(args[4])
-herbaceous_cover_year_of_change <- rast(args[5])
+herbaceous_cover_changes_ref        <- rast(args[4])
+herbaceous_cover_year_of_change_ref <- rast(args[5])
 
 peak_changes_ref                <- rast(args[6])
 peak_year_of_change_ref         <- rast(args[7])
