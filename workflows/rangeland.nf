@@ -79,10 +79,10 @@ workflow RANGELAND {
     //
     // Stage and validate input files
     //
-    data           = Channel.fromPath( "${params.input}/*/*", type: 'dir') .flatten()
-    data           = data.flatten().filter{ inRegion(it) }
-    dem            = file( "$params.dem")
-    wvdb           = file( "$params.wvdb")
+    data           = null
+    data           = null
+    dem            = null
+    wvdb           = null
     cube_file      = file( "$params.data_cube" )
     aoi_file       = file( "$params.aoi" )
     endmember_file = file( "$params.endmember" )
@@ -101,6 +101,13 @@ workflow RANGELAND {
         wvdb  = base_path.map(it -> file("$it/$params.wvdb"))
 
         ch_versions = ch_versions.mix(UNTAR.out.versions)
+    } else {
+        data           = Channel.fromPath( "${params.input}/*/*", type: 'dir') .flatten()
+        data           = data.flatten().filter{ inRegion(it) }
+
+        dem            = file( "$params.dem")
+        wvdb           = file( "$params.wvdb")
+
     }
 
 
