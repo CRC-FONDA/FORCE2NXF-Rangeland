@@ -3,7 +3,7 @@ nextflow.enable.dsl = 2
 process FORCE_PYRAMID {
 
     tag { tile }
-    container "davidfrantz/force:${params.force_version}"
+    container "davidfrantz/force:3.7.11"
 
     input:
     tuple val( tile ), path( image )

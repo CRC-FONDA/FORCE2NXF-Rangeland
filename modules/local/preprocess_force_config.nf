@@ -4,7 +4,7 @@ process PREPROCESS_CONFIG {
 
     tag { data.simpleName }
 
-    container "davidfrantz/force:${params.force_version}"
+    container "davidfrantz/force:3.7.11"
 
     input:
     path data

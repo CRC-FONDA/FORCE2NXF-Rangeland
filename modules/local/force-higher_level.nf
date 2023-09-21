@@ -2,7 +2,7 @@ nextflow.enable.dsl = 2
 
 process FORCE_HIGHER_LEVEL {
 
-    container "davidfrantz/force:${params.force_version}"
+    container "davidfrantz/force:3.7.11"
 
     input:
     tuple path( config ), path( ard ), path( aoi ), path ( datacube ), path ( endmember )
