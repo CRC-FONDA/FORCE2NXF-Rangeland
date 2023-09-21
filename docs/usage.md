@@ -6,8 +6,6 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
-
 ## Input
 
 As most remote sensing workflows, this pipeline relies on numerous sources of data. In the following we will describe the required data and corresponding formats. Mandatory input data consists of satellite data, a digital elevation model, a water vapor database, a data_cube, an area-of-interest specification and an endmember definition.
@@ -98,19 +96,18 @@ The satellite imagery can be given to the pipeline using:
 
 ### Digital Elevation Model (DEM)
 
-A DEM is necessary for topographic correction of Landsat data, and helps to distinguish between cloud shadows and water surfaces.
-The DEM obtained by the [Shuttle Radar Topography Mission](https://www2.jpl.nasa.gov/srtm/) (SRTM) is commonly used. Areas not covered by the SRTM DEM, can be filled with the [Advanced Spaceborne Thermal Emission and Reflection Radiometer](https://asterweb.jpl.nasa.gov/) (ASTER) DEM.
+A DEM is necessary for topographic correction of Landsat data, and helps to distinguish between cloud, shadows and water surfaces. Common sources for digital elevation models are [Copernicus](https://www.copernicus.eu/en),[Shuttle Radar Topography Mission](https://www2.jpl.nasa.gov/srtm/) (SRTM), or [Advanced Spaceborne Thermal Emission and Reflection Radiometer](https://asterweb.jpl.nasa.gov/) (ASTER).
 
-In the setup described above we would expect a path to the Digital Elevation Model root directory as a parameter to the pipeline. Concretely, the expected structure would look like this:
+The pipeline expects a path to the Digital Elevation Model root directory as a parameter. Concretely, the expected structure would look like this:
 
 ```
 dem
-├── global_srtm-aster.vrt
-└── srtm_aster
+├── <dem_file>.vrt
+└── <dem_tifs>/
     └── ...
 ```
 
-Here, `global_srtm-aster.vrt` orchestrates the single digital elevation files in the `srtm_aster` directory.
+Here, `<dem_file>.vrt` orchestrates the single digital elevation files in the `<dem_tifs>` directory.
 
 The DEM can be given to the pipeline using:
 
@@ -124,7 +121,7 @@ For atmospheric correction of Landsat data, information on the atmospheric water
 
 The expected format for the wvdb is a directory containing daily water vapor measurements for the area of interest.
 
-We strongly recommend using a precompiled water vapor database, like [this one](https://zenodo.org/record/4468701).
+We recommend using a precompiled water vapor database, like [this one](https://zenodo.org/record/4468701).
 This global water vapor database can be downloaded by executing this code:
 
 ```bash
@@ -165,7 +162,7 @@ AOI is passed as a single using:
 
 For unmixing satellite-observed reflectance into sub-pixel fractions of land surface components (e.g. photosynthetic active vegetation), endmember spectra are necessary.
 
-An example endmember (developed in [Hostert et al. 2003](https://www.sciencedirect.com/science/article/abs/pii/S0034425703001457)) looks like this:
+An example endmember definition (developed in [Hostert et al. 2003](https://www.sciencedirect.com/science/article/abs/pii/S0034425703001457)) looks like this:
 
 ```
 320  730  2620 0
@@ -268,16 +265,15 @@ The group size can be passed using:
 
 ### FORCE configuration
 
-Users can change certain characteristics of the underlying FORCE tool. First, it is possible to change the version of FORCE using in the pipeline using the `force_version` parameters. The version number should follow the semantic versioning pattern, e.g. "3.6.5". Second, as FORCE supports parallel computations, user can specify the number of threads FORCE can spawn for a single preprocessing or higher level processing process. This is archived through the `force_threads` parameter.
+FORCE supports parallel computations. Users can specify the number of threads FORCE can spawn for a single preprocessing, or higher level processing process. This is archived through the `force_threads` parameter.
 
-FORCE version and number of threads can be passed using:
+The number of threads can be passed using:
 
 ```bash
---force_version '[Sematic versioning number]'
 --force_threads '[integer]'
 ```
 
-Defaults are "3.6.5" for the FORCE version and 2 for the nu,ber of threads.
+The default value is 2.
 
 ## Running the pipeline
 

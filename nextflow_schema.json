@@ -152,37 +152,10 @@
                     "type": "integer",
                     "default": 2,
                     "description": "Number of threads spawned by FORCE for each higher-level or preprocessing task."
-                },
-                "force_version": {
-                    "type": "string",
-                    "default": "3.6.5",
-                    "description": "Version of FORCE to be used.",
-                    "help_text": "Note that non-default version might change pipeline behaviour. Change at own risk."
                 }
             },
             "fa_icon": "fas fa-terminal",
             "help_text": ""
-        },
-        "evaluation_testing_options": {
-            "title": "Evaluation/Testing options",
-            "type": "object",
-            "description": "Configuration for testing and result checking.",
-            "default": "",
-            "properties": {
-                "reference_data": {
-                    "type": "string",
-                    "default": "None",
-                    "description": "Path to reference data file.",
-                    "help_text": "File must be an .RData file, see assets/reference.RData for example."
-                },
-                "skip_result_checking": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Whether results should be compared with the refernce data after the pipeline finished.",
-                    "help_text": "Note that this will only work if params.reference_data is specified."
-                }
-            },
-            "help_text": "Only usable of some reference can be used for comparison."
         },
         "generic_options": {
             "title": "Generic options",
@@ -335,9 +308,6 @@
         },
         {
             "$ref": "#/definitions/force_parameters"
-        },
-        {
-            "$ref": "#/definitions/evaluation_testing_options"
         },
         {
             "$ref": "#/definitions/generic_options"
