@@ -46,10 +46,11 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK }   from '../subworkflows/local/input_check'
-include { CHECK_RESULTS } from '../modules/local/check_results'
 include { PREPROCESSING } from '../subworkflows/local/preprocessing'
 include { HIGHER_LEVEL }  from '../subworkflows/local/higher_level'
 
+include { CHECK_RESULTS } from '../modules/local/check_results'
+include { UNTAR }         from '../modules/nf-core/untar/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -74,12 +75,6 @@ def multiqc_report = []
 workflow RANGELAND {
 
     ch_versions = Channel.empty()
-    /*
-    INPUT_CHECK (
-        ch_input
-    )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-    */
 
     //
     // Stage and validate input files
@@ -92,6 +87,29 @@ workflow RANGELAND {
     aoi_file       = file( "$params.aoi" )
     endmember_file = file( "$params.endmember" )
 
+    //
+    // MODULE: untar
+    //
+    if (params.tar_source != null) {
+        UNTAR([[:], params.tar_source])
+        base_path = UNTAR.out.untar.map(it -> it[1])
+
+        data = base_path.map(it -> file("$it/$params.input/*/*", type: 'dir')).flatten()
+        data = data.flatten().filter{ inRegion(it) }
+
+        dem   = base_path.map(it -> file("$it/$params.dem"))
+        wvdb  = base_path.map(it -> file("$it/$params.wvdb"))
+
+        ch_versions = ch_versions.mix(UNTAR.out.versions)
+    }
+
+
+    /*
+    INPUT_CHECK (
+        ch_input
+    )
+    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    */
 
     //
     // SUBWORKFLOW: Preprocess satellite imagery
@@ -110,7 +128,7 @@ workflow RANGELAND {
     //
     // MODULE: Check results
     //
-    if ( !params.skip_result_checking ) {
+    if ( params.config_profile_name == 'Test profile' ) {
         woody_change_ref      = file("$params.woody_change_ref")
         woody_yoc_ref         = file("$params.woody_yoc_ref")
         herbaceous_change_ref = file("$params.herbaceous_change_ref")
