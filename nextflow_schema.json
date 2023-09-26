@@ -19,6 +19,12 @@
                     "help_text": "Set this to the root directory of all satellite imagery. Directory structure should match format of data downloaded with '$ force-level1-csd\n' For concrete directory structure see ./docs/usage.md ",
                     "description": "Root directory of all sattelite imagery."
                 },
+                "input_tar": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-archive",
+                    "description": "Indicates whether input is a tar archive.",
+                    "help_text": "Set to true if input is a tar archive. The workflow will extract it then."
+                },
                 "dem": {
                     "type": "string",
                     "default": "None",
@@ -26,12 +32,24 @@
                     "fa_icon": "fas fa-mountain",
                     "description": "Digital elevation model."
                 },
+                "dem_tar": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-archive",
+                    "description": "Indicates whether dem is a tar archive.",
+                    "help_text": "Set to true if dem is a tar archive. The workflow will extract it then."
+                },
                 "wvdb": {
                     "type": "string",
                     "default": "None",
                     "fa_icon": "fas fa-burn",
                     "description": "Water vapor dataset.",
                     "help_text": "Directory containg a number text files describing global water vapor data at different timestamps, and a coordinate order (.coo-)file containig the reference system of the water vapor data."
+                },
+                "wvdb_tar": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-archive",
+                    "description": "Indicates whether wvdb is a tar archive.",
+                    "help_text": "Set to true if wvdb is a tar archive. The workflow will extract it then."
                 },
                 "data_cube": {
                     "type": "string",

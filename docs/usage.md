@@ -86,13 +86,15 @@ mkdir -p data
 force-level1-csd -s "LT04,LT05,LE07" -d "19840101,20061231" -c 0,70 meta/ data/ queue.txt vector/aoi.gpkg
 ```
 
-Note that you need to pass a area-of-interest file, see the area of interest section [Area of interest](#aoi) for details.
+Note that you need to pass an area-of-interest file, see the area of interest section [Area of interest](#aoi) for details.
 
 The satellite imagery can be given to the pipeline using:
 
 ```bash
 --input '[path to imagery root]'
 ```
+
+The satellite imagery can also be provide as a tar archive. In this case it is mandatory to set `--input_tar` to true. Moreover, within the tar archive, the structure explained above has to be in place. In the example above `181036/` and `181035/` would need to be in the top level of the archive.
 
 ### Digital Elevation Model (DEM)
 
@@ -115,6 +117,8 @@ The DEM can be given to the pipeline using:
 --dem '[path to dem root]'
 ```
 
+The digital elevation model can also be provide as a tar archive. In this case it is mandatory to set `--dem_tar` to true. Moreover, within the tar archive, the structure explained above has to be in place. In the example above `<dem_file>.vrt` and `<dem_tifs>/` would need to be in the top level of the archive.
+
 ### Water Vapor Database (WVDB)
 
 For atmospheric correction of Landsat data, information on the atmospheric water vapor content is necessary.
@@ -135,6 +139,8 @@ The WVDB can be given to the pipeline using:
 ```bash
 --wvdb '[path to wvdb dir]'
 ```
+
+The water vapor database can also be provide as a tar archive. In this case it is mandatory to set `--wvdb_tar` to true. All files of the wvdb would need to be in the top level of the archive.
 
 ### Datacube
 
