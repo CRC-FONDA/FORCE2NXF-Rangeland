@@ -58,7 +58,7 @@ The rangeland workflow was originally written by:
 
 Transformation to nf-core/rangeland was conducted by [Felix Kummer](https://github.com/Felix-Kummer).
 
-We thank the following people for their extensive assistance in the development of this pipeline: Fabian Lehmann.
+We thank the following people for their extensive assistance in the development of this pipeline: Fabian Lehmann, Katarzyna Ewa Lewinska.
 
 ## Contributions and Support
 
