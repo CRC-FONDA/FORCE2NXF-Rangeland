@@ -50,7 +50,8 @@ include { PREPROCESSING } from '../subworkflows/local/preprocessing'
 include { HIGHER_LEVEL }  from '../subworkflows/local/higher_level'
 
 include { CHECK_RESULTS } from '../modules/local/check_results'
-include { UNTAR }         from '../modules/nf-core/untar/main'
+
+include { UNTAR as UNTAR_INPUT; UNTAR as UNTAR_DEM; UNTAR as UNTAR_WVDB } from '../modules/nf-core/untar/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -80,7 +81,6 @@ workflow RANGELAND {
     // Stage and validate input files
     //
     data           = null
-    data           = null
     dem            = null
     wvdb           = null
     cube_file      = file( "$params.data_cube" )
@@ -90,26 +90,32 @@ workflow RANGELAND {
     //
     // MODULE: untar
     //
-    if (params.tar_source != null) {
-        UNTAR([[:], params.tar_source])
-        base_path = UNTAR.out.untar.map(it -> it[1])
+    if (params.input_tar) {
+        UNTAR_INPUT([[:], params.input])
+        base_path = UNTAR_INPUT.out.untar.map(it -> it[1])
 
-        data = base_path.map(it -> file("$it/$params.input/*/*", type: 'dir')).flatten()
+        data = base_path.map(it -> file("$it/*/*", type: 'dir')).flatten()
         data = data.flatten().filter{ inRegion(it) }
 
-        dem   = base_path.map(it -> file("$it/$params.dem"))
-        wvdb  = base_path.map(it -> file("$it/$params.wvdb"))
-
-        ch_versions = ch_versions.mix(UNTAR.out.versions)
+        ch_versions = ch_versions.mix(UNTAR_INPUT.out.versions)
     } else {
-        data           = Channel.fromPath( "${params.input}/*/*", type: 'dir') .flatten()
-        data           = data.flatten().filter{ inRegion(it) }
-
-        dem            = file( "$params.dem")
-        wvdb           = file( "$params.wvdb")
-
+        data = Channel.fromPath( "${params.input}/*/*", type: 'dir') .flatten()
+        data = data.flatten().filter{ inRegion(it) }
     }
 
+    if (params.dem_tar) {
+        UNTAR_DEM([[:], params.dem])
+        dem = UNTAR_DEM.out.untar.map(it -> file(it[1]))
+    } else {
+        dem = file("$params.dem")
+    }
+
+    if (params.wvdb_tar) {
+        UNTAR_WVDB([[:], params.wvdb])
+        wvdb = UNTAR_WVDB.out.untar.map(it -> file(it[1]))
+    } else {
+        wvdb = file("$params.wvdb")
+    }
 
     /*
     INPUT_CHECK (
